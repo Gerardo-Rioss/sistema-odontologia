@@ -17,7 +17,7 @@ export interface StoreUser {
 
 /**
  * Estado global de la aplicación.
- * Maneja autenticación (user, isAuthenticated, login, logout) y UI (sidebar).
+ * Maneja autenticación (user, isAuthenticated, setUser, hydrateFromSession) y UI (sidebar).
  */
 interface AppState {
   // ─── Auth state ────────────────────────────────────────────
@@ -28,8 +28,23 @@ interface AppState {
   sidebarOpen: boolean;
 
   // ─── Auth actions ──────────────────────────────────────────
-  login: (user: StoreUser) => void;
-  logout: () => void;
+  /** Establece el usuario directamente. user === null cierra la sesión. */
+  setUser: (user: StoreUser | null) => void;
+  /**
+   * Sincroniza el store con los datos de sesión de NextAuth.
+   * Se llama desde el dashboard layout cuando useSession() retorna datos.
+   */
+  hydrateFromSession: (
+    sessionUser:
+      | {
+          id?: string;
+          email?: string | null;
+          name?: string | null;
+          role?: string;
+        }
+      | undefined
+      | null
+  ) => void;
 
   // ─── UI actions ────────────────────────────────────────────
   toggleSidebar: () => void;
@@ -43,8 +58,24 @@ export const useStore = create<AppState>((set) => ({
   sidebarOpen: true,
 
   // Auth
-  login: (user) => set({ user, isAuthenticated: true }),
-  logout: () => set({ user: null, isAuthenticated: false }),
+  setUser: (user) => set({ user, isAuthenticated: user !== null }),
+
+  hydrateFromSession: (sessionUser) => {
+    if (!sessionUser?.id || !sessionUser?.email) {
+      set({ user: null, isAuthenticated: false });
+      return;
+    }
+
+    set({
+      user: {
+        id: sessionUser.id,
+        email: sessionUser.email,
+        name: sessionUser.name ?? sessionUser.email,
+        role: (sessionUser.role as UserRole) ?? "DENTIST",
+      },
+      isAuthenticated: true,
+    });
+  },
 
   // UI
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),

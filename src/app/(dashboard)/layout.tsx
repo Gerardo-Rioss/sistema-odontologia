@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { SessionProvider } from "@/components/auth/SessionProvider";
+import { useStore } from "@/store/useStore";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: "📊" },
@@ -13,16 +16,23 @@ const navItems = [
 ];
 
 /**
- * Dashboard layout — sidebar fijo a la izquierda + header superior.
- * Las páginas dentro de (dashboard) heredan este layout automáticamente.
+ * Componente interno que consume useSession() y sincroniza con Zustand.
+ * Debe estar dentro del árbol de SessionProvider.
  */
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function DashboardContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { data: session } = useSession();
+  const hydrateFromSession = useStore((s) => s.hydrateFromSession);
+  const user = useStore((s) => s.user);
+
+  // Sincronizar estado de NextAuth → Zustand al montar y en cada cambio de sesión
+  useEffect(() => {
+    hydrateFromSession(session?.user);
+  }, [session, hydrateFromSession]);
+
+  // Obtener inicial del usuario para el avatar
+  const avatarInitial = user?.name?.charAt(0).toUpperCase() ?? "?";
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -89,11 +99,14 @@ export default function DashboardLayout({
           </h2>
 
           <div className="flex items-center space-x-4">
+            {user && (
+              <span className="text-sm text-gray-500">{user.name}</span>
+            )}
             <button className="text-sm text-gray-500 hover:text-gray-700">
               Notificaciones
             </button>
-            <div className="h-8 w-8 rounded-full bg-blue-600 text-center text-sm leading-8 text-white">
-              A
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm text-white">
+              {avatarInitial}
             </div>
           </div>
         </header>
@@ -102,5 +115,22 @@ export default function DashboardLayout({
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
+  );
+}
+
+/**
+ * Dashboard layout — sidebar fijo a la izquierda + header superior.
+ * Envuelto en SessionProvider para que useSession() funcione.
+ * Las páginas dentro de (dashboard) heredan este layout automáticamente.
+ */
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <SessionProvider>
+      <DashboardContent>{children}</DashboardContent>
+    </SessionProvider>
   );
 }
