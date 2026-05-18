@@ -1,12 +1,14 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { authService } from "@/services/auth.service";
 
 /**
  * Configuración centralizada de NextAuth.js (Auth.js v5).
  * Estrategia: JWT sin adaptador de base de datos (stateless).
  * Proveedor: Credentials (email + contraseña).
  *
- * TODO Fase 2: Implementar validación real contra Prisma + bcrypt.
+ * El callback authorize() delega en AuthService.validateCredentials(),
+ * que busca al usuario en Prisma y compara la contraseña con bcrypt.
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -17,31 +19,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Contraseña", type: "password" },
       },
       async authorize(credentials) {
-        // Placeholder — la validación real se implementa en Fase 2 (Autenticación)
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
-        // TODO: Buscar usuario en Prisma y validar contraseña con bcrypt
-        if (
-          typeof credentials.email === "string" &&
-          typeof credentials.password === "string"
-        ) {
-          // Usuario placeholder para desarrollo
-          return {
-            id: "dev-user-1",
-            email: credentials.email,
-            name: "Usuario de Desarrollo",
-          };
+        const email =
+          typeof credentials.email === "string" ? credentials.email : "";
+        const password =
+          typeof credentials.password === "string" ? credentials.password : "";
+
+        if (!email || !password) {
+          return null;
         }
 
-        return null;
+        try {
+          const user = await authService.verifyCredentials(email, password);
+          if (!user) {
+            return null;
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.firstName,
+            role: user.role,
+          };
+        } catch {
+          return null;
+        }
       },
     }),
   ],
 
   session: {
     strategy: "jwt",
+    maxAge: 86400, // 24 horas
   },
 
   callbacks: {
@@ -49,7 +61,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // Adjuntar datos del usuario al token JWT
       if (user) {
         token.id = user.id;
-        token.role = (user as { role?: string }).role ?? "DENTIST";
+        token.role = user.role ?? "DENTIST";
       }
       return token;
     },
@@ -58,7 +70,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // Exponer datos del token en la sesión del cliente
       if (session.user) {
         session.user.id = token.id as string;
-        (session.user as { role?: string }).role = token.role as string;
+        session.user.role = token.role as string;
       }
       return session;
     },
