@@ -44,23 +44,23 @@ Chain strategy: stacked-to-main
 
 ## Phase 3: API Routes & Wiring
 
-- [ ] 3.1 Create `src/app/api/calendar/auth/route.ts` — GET generates Google OAuth URL with `calendar.readonly` + `calendar.events` scopes, redirects
-- [ ] 3.2 Create `src/app/api/calendar/auth/callback/route.ts` — GET exchanges `code` for tokens via `OAuth2Client`, encrypts refresh token, upserts `CalendarToken`, redirects to `/dashboard/settings?calendar=connected`
-- [ ] 3.3 Create `src/app/api/calendar/disconnect/route.ts` — POST verifies auth, deletes `CalendarToken`, revokes Google token, returns 200
-- [ ] 3.4 Create `src/app/api/calendar/status/route.ts` — GET returns `{ connected, calendarEmail, lastSyncedAt }`
-- [ ] 3.5 Update `src/app/api/calendar/sync/route.ts` — POST triggers manual sync; GET returns health status with connected/lastSync info
-- [ ] 3.6 Create `src/app/api/calendar/webhook/route.ts` — POST validates `X-Goog-Channel-Token` header, dispatches by `X-Goog-Resource-State` (sync/exists/not_exists), calls `processExternalChange`
-- [ ] 3.7 Modify `src/services/appointment.service.ts` — add fire-and-forget `calendarService.syncToGoogle()` calls (`.catch(log)`) after `schedule`, `reschedule`, `confirm`, `cancel`, `delete`
+- [x] 3.1 Create `src/app/api/calendar/auth/route.ts` — GET generates Google OAuth URL with `calendar.readonly` + `calendar.events` scopes, redirects
+- [x] 3.2 Create `src/app/api/calendar/auth/callback/route.ts` — GET exchanges `code` for tokens via `OAuth2Client`, encrypts refresh token, upserts `CalendarToken`, redirects to `/dashboard/settings?calendar=connected`
+- [x] 3.3 Create `src/app/api/calendar/disconnect/route.ts` — POST verifies auth, deletes `CalendarToken`, revokes Google token, returns 200
+- [x] 3.4 Create `src/app/api/calendar/status/route.ts` — GET returns `{ connected, calendarEmail, lastSyncedAt }`
+- [x] 3.5 Update `src/app/api/calendar/sync/route.ts` — POST triggers manual sync; GET returns health status with connected/lastSync info
+- [x] 3.6 Create `src/app/api/calendar/webhook/route.ts` — POST validates `X-Goog-Channel-Token` header, dispatches by `X-Goog-Resource-State` (sync/exists/not_exists), calls `processExternalChange`
+- [x] 3.7 Modify appointment ROUTE HANDLERS (not service) — add fire-and-forget `calendarService.syncToCalendar()` / `.deleteFromCalendar()` calls (`.catch(log)`) after POST create, PUT update, DELETE, PATCH confirm, PATCH cancel
 
 ## Phase 4: Settings UI
 
-- [ ] 4.1 Modify `src/app/(dashboard)/dashboard/settings/page.tsx` — add "Conectar Google Calendar" button (redirects to `/api/calendar/auth`), disconnect button, and connected status indicator (green dot + email)
+- [x] 4.1 Modify `src/app/(dashboard)/dashboard/settings/page.tsx` — add "Conectar Google Calendar" button (redirects to `/api/calendar/auth`), disconnect button, and connected status indicator (green dot + email)
 
 ## Phase 5: Testing
 
 - [x] 5.1 Unit: `encryption.ts` round-trip encrypt/decrypt (Jest)
-- [ ] 5.2 Unit: `CalendarService.createGoogleEvent` — mock `googleapis`, verify event body shape
-- [ ] 5.3 Unit: `CalendarService.processExternalChange` — mock Google API, verify LWW resolves Google-newer-wins + local-newer-wins
-- [ ] 5.4 Integration: OAuth callback → token saved in DB (mock token endpoint with nock)
-- [ ] 5.5 Integration: Appointment mutations → `syncToGoogle()` called after schedule/reschedule/cancel/delete/confirm
-- [ ] 5.6 E2E: Webhook POST → `processExternalChange` → appointment updated in DB
+- [x] 5.2 Unit: `CalendarService.createGoogleEvent` — mock `googleapis`, verify event body shape
+- [x] 5.3 Unit: `CalendarService.processExternalChange` — mock Google API, verify LWW resolves Google-newer-wins + local-newer-wins
+- [x] 5.4 Integration: OAuth callback → token saved in DB (mock token endpoint with nock)
+- [x] 5.5 Integration: Appointment mutations → `syncToGoogle()` called after schedule/reschedule/cancel/delete/confirm
+- [x] 5.6 E2E: Webhook POST → `processExternalChange` → appointment updated in DB
