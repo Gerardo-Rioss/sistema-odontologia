@@ -1,0 +1,75 @@
+// ─── Generador ──────────────────────────────────────────────────
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─── Fuente de datos ──────────────────────────────────────────
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ─────────────────────────────────────────────────────
+enum Role {
+  ADMIN
+  DENTIST
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+// ─── Modelos ───────────────────────────────────────────────────
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(DENTIST)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patients      Patient[]
+  appointments  Appointment[]
+
+  @@map("users")
+}
+
+model Patient {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String
+  birthDate DateTime?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  appointments Appointment[]
+
+  @@map("patients")
+}
+
+model Appointment {
+  id        String            @id @default(cuid())
+  date      DateTime          @db.Date
+  time      String
+  status    AppointmentStatus @default(SCHEDULED)
+  type      String
+  notes     String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("appointments")
+}
