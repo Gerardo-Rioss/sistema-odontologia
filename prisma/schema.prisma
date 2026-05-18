@@ -30,6 +30,13 @@ enum AppointmentType {
   OTRO
 }
 
+// ─── Calendar Connection ─────────────────────────────────────
+enum CalendarConnectionStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
 // ─── Modelos ───────────────────────────────────────────────────
 model User {
   id             String   @id @default(cuid())
@@ -46,11 +53,31 @@ model User {
   patients            Patient[]
   appointments        Appointment[]
   passwordResetTokens PasswordResetToken[]
+  calendarConnection  CalendarConnection?
 
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
 
   @@map("users")
+}
+
+model CalendarConnection {
+  id               String                    @id @default(cuid())
+  userId           String                    @unique
+  user             User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken      String
+  refreshToken     String
+  tokenExpiry      DateTime
+  googleCalendarId String                    @default("primary")
+  googleEmail      String?
+  status           CalendarConnectionStatus  @default(ACTIVE)
+  googleChannelId  String?
+  googleResourceId String?
+  lastSyncedAt     DateTime?
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+
+  @@map("calendar_connections")
 }
 
 model Patient {
@@ -78,6 +105,8 @@ model Appointment {
   status    AppointmentStatus @default(PENDING)
   type      AppointmentType
   notes     String?
+  googleEventId     String?  @unique
+  googleCalendarId  String?
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 
