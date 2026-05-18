@@ -2,7 +2,19 @@
 export type Role = "ADMIN" | "DENTIST";
 
 // ─── Estados de cita ─────────────────────────────────────────
-export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED";
+export type AppointmentStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "CANCELLED"
+  | "COMPLETED";
+
+// ─── Tipos de cita ──────────────────────────────────────────
+export type AppointmentType =
+  | "LIMPIEZA"
+  | "REVISION"
+  | "URGENCIA"
+  | "TRATAMIENTO"
+  | "OTRO";
 
 // ─── Usuario ─────────────────────────────────────────────────
 export interface User {
@@ -65,22 +77,66 @@ export interface Patient {
   email: string | null;
   phone: string;
   birthDate: Date | null;
+  notes: string | null;
+  userId: string;
   createdAt: Date;
+  updatedAt: Date;
+
+  // Relaciones (opcionales, presentes al hacer include)
+  user?: User;
+  appointments?: Appointment[];
+  _count?: { appointments: number };
 }
 
 // ─── Cita ────────────────────────────────────────────────────
 export interface Appointment {
   id: string;
   date: Date;
+  time: string;
   status: AppointmentStatus;
+  type: AppointmentType;
   notes: string | null;
   userId: string;
   patientId: string;
   createdAt: Date;
+  updatedAt: Date;
 
   // Relaciones (opcionales, presentes al hacer include)
   user?: User;
   patient?: Patient;
+}
+
+// ─── Item de lista de citas (incluye nombre del paciente) ──
+export interface AppointmentListItem {
+  id: string;
+  date: Date;
+  time: string;
+  status: AppointmentStatus;
+  type: AppointmentType;
+  notes: string | null;
+  patientId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  patient: {
+    id: string;
+    name: string;
+  };
+}
+
+// ─── Mensaje ─────────────────────────────────────────────────
+export interface Message {
+  id: string;
+  content: string;
+  senderId: string;
+  receiverId: string;
+  appointmentId: string | null;
+  readAt: Date | null;
+  createdAt: Date;
+
+  // Relaciones (opcionales, presentes al hacer include)
+  sender?: User;
+  receiver?: User;
+  appointment?: Appointment;
 }
 
 // ─── Respuesta de API genérica ───────────────────────────────
