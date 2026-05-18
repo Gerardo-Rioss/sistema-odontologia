@@ -106,8 +106,8 @@ async function main(): Promise<void> {
       data: {
         date: tomorrow,
         time: "09:00",
-        status: AppointmentStatus.SCHEDULED,
-        type: "Limpieza dental",
+        status: AppointmentStatus.PENDING,
+        type: "LIMPIEZA",
         notes: "Recordar usar hilo dental",
         patientId: patients[0].id,
         userId: admin.id,
@@ -117,8 +117,8 @@ async function main(): Promise<void> {
       data: {
         date: tomorrow,
         time: "11:00",
-        status: AppointmentStatus.SCHEDULED,
-        type: "Revisión de ortodoncia",
+        status: AppointmentStatus.PENDING,
+        type: "REVISION",
         notes: "Ajustar brackets superiores",
         patientId: patients[3].id,
         userId: dentist.id,
@@ -128,8 +128,8 @@ async function main(): Promise<void> {
       data: {
         date: nextWeek,
         time: "15:00",
-        status: AppointmentStatus.SCHEDULED,
-        type: "Extracción",
+        status: AppointmentStatus.PENDING,
+        type: "OTRO",
         notes: "Extraer muela del juicio inferior derecha",
         patientId: patients[1].id,
         userId: admin.id,
