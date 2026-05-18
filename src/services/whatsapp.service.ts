@@ -97,7 +97,21 @@ export class WhatsAppService {
 
     const msg: WhatsAppInboundMessage = messages[0];
     const phoneNumber = msg.from;
-    const messageText = msg.text?.body ?? "";
+
+    // Extract text from plain text messages or interactive reply IDs
+    let messageText = msg.text?.body ?? "";
+
+    if (!messageText && msg.interactive) {
+      const interactive = msg.interactive as Record<string, unknown>;
+      const listReply = interactive.list_reply as
+        | { id: string; title?: string }
+        | undefined;
+      const buttonReply = interactive.button_reply as
+        | { id: string; title?: string }
+        | undefined;
+      messageText = listReply?.id ?? buttonReply?.id ?? "";
+    }
+
     const messageId = msg.id;
 
     // Persist inbound message

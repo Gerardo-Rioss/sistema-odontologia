@@ -98,12 +98,14 @@ export interface Appointment {
   notes: string | null;
   userId: string;
   patientId: string;
+  whatsappReminderSent: string | null;
   createdAt: Date;
   updatedAt: Date;
 
   // Relaciones (opcionales, presentes al hacer include)
   user?: User;
   patient?: Patient;
+  whatsappMessages?: WhatsAppMessage[];
 }
 
 // ─── Item de lista de citas (incluye nombre del paciente) ──
@@ -137,6 +139,107 @@ export interface Message {
   sender?: User;
   receiver?: User;
   appointment?: Appointment;
+}
+
+// ─── Dirección de mensaje WhatsApp ────────────────────────────
+export type MessageDirection = "INBOUND" | "OUTBOUND";
+
+// ─── Tipo de mensaje WhatsApp ───────────────────────────────
+export type MessageTypeEnum = "TEXT" | "TEMPLATE" | "INTERACTIVE";
+
+// ─── Estados de conversación WhatsApp ────────────────────────
+export type ConversationStateEnum =
+  | "IDLE"
+  | "GREETING"
+  | "SERVICE_SELECTION"
+  | "DATE_SELECTION"
+  | "TIME_SELECTION"
+  | "CONFIRMATION"
+  | "COMPLETED";
+
+// ─── Contexto de conversación ────────────────────────────────
+export interface ConversationContext {
+  selectedService?: string;
+  selectedDate?: string;
+  selectedTime?: string;
+  appointmentId?: string;
+  awaitingCancellation?: boolean;
+}
+
+// ─── Mensaje de WhatsApp ─────────────────────────────────────
+export interface WhatsAppMessage {
+  id: string;
+  waMessageId: string;
+  phoneNumber: string;
+  body: string;
+  direction: MessageDirection;
+  messageType: MessageTypeEnum;
+  templateName: string | null;
+  userId: string | null;
+  appointmentId: string | null;
+  createdAt: Date;
+
+  // Relaciones (opcionales, presentes al hacer include)
+  user?: User;
+  appointment?: Appointment;
+}
+
+// ─── Estado de conversación WhatsApp ─────────────────────────
+export interface ConversationState {
+  id: string;
+  phoneNumber: string;
+  currentState: ConversationStateEnum;
+  context: ConversationContext;
+  expiresAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ─── Payload del webhook de WhatsApp ────────────────────────
+export interface WhatsAppWebhookPayload {
+  object: string;
+  entry: WhatsAppWebhookEntry[];
+}
+
+export interface WhatsAppWebhookEntry {
+  id: string;
+  changes: WhatsAppWebhookChange[];
+}
+
+export interface WhatsAppWebhookChange {
+  value: WhatsAppWebhookValue;
+  field: string;
+}
+
+export interface WhatsAppWebhookValue {
+  messaging_product: string;
+  metadata: {
+    display_phone_number: string;
+    phone_number_id: string;
+  };
+  contacts?: WhatsAppContact[];
+  messages?: WhatsAppInboundMessage[];
+  statuses?: unknown[];
+}
+
+export interface WhatsAppContact {
+  profile: { name: string };
+  wa_id: string;
+}
+
+export interface WhatsAppInboundMessage {
+  from: string;
+  id: string;
+  timestamp: string;
+  type: string;
+  text?: { body: string };
+  interactive?: unknown;
+}
+
+// ─── Slot disponible ────────────────────────────────────────
+export interface AvailableSlot {
+  time: string;
+  available: boolean;
 }
 
 // ─── Respuesta de API genérica ───────────────────────────────
