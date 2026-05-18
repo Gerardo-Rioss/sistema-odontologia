@@ -18,6 +18,8 @@ async function main(): Promise<void> {
     data: {
       email: "admin@odontologia.com",
       password: hashedPassword,
+      firstName: "Dr.",
+      lastName: "García",
       name: "Dr. García",
       role: Role.ADMIN,
     },
@@ -27,12 +29,14 @@ async function main(): Promise<void> {
     data: {
       email: "dentista@odontologia.com",
       password: hashedPassword,
+      firstName: "Dra.",
+      lastName: "Martínez",
       name: "Dra. Martínez",
       role: Role.DENTIST,
     },
   });
 
-  console.log(`✅ Usuarios creados: ${admin.name}, ${dentist.name}`);
+  console.log(`✅ Usuarios creados: ${admin.firstName} ${admin.lastName}, ${dentist.firstName} ${dentist.lastName}`);
 
   // ─── Crear pacientes ──────────────────────────────────────────
   const patients = await Promise.all([

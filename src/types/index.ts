@@ -8,9 +8,54 @@ export type AppointmentStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED";
 export interface User {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  name?: string | null; // @deprecated — usar firstName + lastName
   role: Role;
+  emailVerified: Date | null;
   createdAt: Date;
+}
+
+// ─── Usuario en sesión (cliente) ─────────────────────────────
+export interface SessionUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: Role;
+  emailVerified: Date | null;
+}
+
+// ─── Inputs de autenticación ─────────────────────────────────
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
+export interface RegisterInput {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface ForgotPasswordInput {
+  email: string;
+}
+
+export interface ResetPasswordInput {
+  token: string;
+  password: string;
+}
+
+// ─── Respuesta de autenticación ──────────────────────────────
+export interface AuthResponse {
+  success: boolean;
+  data?: {
+    user: SessionUser;
+  };
+  error?: string;
+  message?: string;
 }
 
 // ─── Paciente ────────────────────────────────────────────────
