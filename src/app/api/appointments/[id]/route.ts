@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { appointmentService } from "@/services/appointment.service";
+import { calendarService } from "@/services/calendar.service";
 import { UpdateAppointmentDTO } from "@/lib/validations";
 import { ZodError } from "zod";
 
@@ -74,6 +75,16 @@ export async function PUT(
       session.user.id
     );
 
+    // Fire-and-forget: sync updated appointment to Google Calendar
+    calendarService
+      .syncToCalendar(appointment.id, session.user.id)
+      .catch((err) =>
+        console.error(
+          `[Appointments] Calendar sync failed for ${appointment.id}:`,
+          err
+        )
+      );
+
     return NextResponse.json({ success: true, data: appointment });
   } catch (error) {
     if (error instanceof ZodError) {
@@ -114,6 +125,28 @@ export async function DELETE(
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    // Fetch appointment before deletion to access calendar metadata
+    const appointment = await appointmentService.getById(
+      params.id,
+      session.user.id
+    );
+
+    // Fire-and-forget: delete from Google Calendar before local deletion
+    if (appointment?.googleEventId && appointment?.googleCalendarId) {
+      calendarService
+        .deleteFromCalendar(
+          appointment.googleEventId,
+          appointment.googleCalendarId,
+          session.user.id
+        )
+        .catch((err) =>
+          console.error(
+            `[Appointments] Calendar delete failed for ${appointment.id}:`,
+            err
+          )
+        );
     }
 
     await appointmentService.delete(params.id, session.user.id);

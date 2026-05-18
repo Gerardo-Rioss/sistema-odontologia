@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { appointmentService } from "@/services/appointment.service";
+import { calendarService } from "@/services/calendar.service";
 import { CreateAppointmentDTO } from "@/lib/validations";
 import { ZodError } from "zod";
 
@@ -65,6 +66,16 @@ export async function POST(request: NextRequest) {
       parsed.data,
       session.user.id
     );
+
+    // Fire-and-forget: sync to Google Calendar (do not block response)
+    calendarService
+      .syncToCalendar(appointment.id, session.user.id)
+      .catch((err) =>
+        console.error(
+          `[Appointments] Calendar sync failed for ${appointment.id}:`,
+          err
+        )
+      );
 
     return NextResponse.json(
       { success: true, data: appointment },

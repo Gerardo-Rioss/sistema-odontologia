@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { appointmentService } from "@/services/appointment.service";
+import { calendarService } from "@/services/calendar.service";
 
 /**
  * Cancelar una cita (PENDING | CONFIRMED → CANCELLED).
@@ -20,6 +21,16 @@ export async function PATCH(
       params.id,
       session.user.id
     );
+
+    // Fire-and-forget: sync cancelled appointment to Google Calendar
+    calendarService
+      .syncToCalendar(appointment.id, session.user.id)
+      .catch((err) =>
+        console.error(
+          `[Appointments] Calendar sync failed for ${appointment.id}:`,
+          err
+        )
+      );
 
     return NextResponse.json({ success: true, data: appointment });
   } catch (error) {
