@@ -1,0 +1,23 @@
+# name: Deploy a Vercel
+#
+# on:
+#   push:
+#     branches: [main]
+#
+# jobs:
+#   deploy:
+#     name: Deploy
+#     runs-on: ubuntu-latest
+#
+#     steps:
+#       - name: Checkout código
+#         uses: actions/checkout@v4
+#
+#       # TODO: Descomentar cuando el proyecto de Vercel esté configurado
+#       # - name: Deploy a Vercel
+#       #   uses: amondnet/vercel-action@v25
+#       #   with:
+#       #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
+#       #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+#       #     vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+#       #     vercel-args: "--prod"
