@@ -36,3 +36,64 @@ export const UpdateAppointmentDTO = z.object({
 });
 
 export type UpdateAppointmentDTO = z.infer<typeof UpdateAppointmentDTO>;
+
+// ─── Esquemas de autenticación ──────────────────────────────
+
+/**
+ * Esquema de validación para inicio de sesión.
+ */
+export const loginSchema = z.object({
+  email: z
+    .string({ required_error: "El correo es requerido" })
+    .email("El correo electrónico no es válido"),
+  password: z
+    .string({ required_error: "La contraseña es requerida" })
+    .min(1, "La contraseña es requerida"),
+});
+
+export type LoginSchema = z.infer<typeof loginSchema>;
+
+/**
+ * Esquema de validación para registro de usuario.
+ */
+export const registerSchema = z.object({
+  email: z
+    .string({ required_error: "El correo es requerido" })
+    .email("El correo electrónico no es válido"),
+  password: z
+    .string({ required_error: "La contraseña es requerida" })
+    .min(8, "La contraseña debe tener al menos 8 caracteres"),
+  firstName: z
+    .string({ required_error: "El nombre es requerido" })
+    .min(1, "El nombre es requerido"),
+  lastName: z
+    .string({ required_error: "El apellido es requerido" })
+    .min(1, "El apellido es requerido"),
+});
+
+export type RegisterSchema = z.infer<typeof registerSchema>;
+
+/**
+ * Esquema de validación para solicitud de recuperación de contraseña.
+ */
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string({ required_error: "El correo es requerido" })
+    .email("El correo electrónico no es válido"),
+});
+
+export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>;
+
+/**
+ * Esquema de validación para restablecimiento de contraseña con token.
+ */
+export const resetPasswordSchema = z.object({
+  token: z
+    .string({ required_error: "El token es requerido" })
+    .min(1, "El token es requerido"),
+  password: z
+    .string({ required_error: "La contraseña es requerida" })
+    .min(8, "La contraseña debe tener al menos 8 caracteres"),
+});
+
+export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
