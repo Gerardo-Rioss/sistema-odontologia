@@ -21,6 +21,9 @@ import type { User as PrismaUser } from "@prisma/client";
 jest.mock("@/repositories/user.repository");
 jest.mock("@/lib/prisma", () => ({
   prisma: {
+    user: {
+      update: jest.fn(),
+    },
     passwordResetToken: {
       create: jest.fn(),
       findUnique: jest.fn(),
@@ -33,6 +36,9 @@ jest.mock("bcryptjs");
 
 const mockUserRepo = userRepository as jest.Mocked<typeof userRepository>;
 const mockPrisma = prisma as unknown as {
+  user: {
+    update: jest.Mock;
+  };
   passwordResetToken: {
     create: jest.Mock;
     findUnique: jest.Mock;

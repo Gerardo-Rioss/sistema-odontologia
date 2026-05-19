@@ -32,6 +32,7 @@ jest.mock("@/repositories/calendar.repository", () => ({
 // Mock googleapis
 const mockGetToken = jest.fn();
 const mockGetTokenInfo = jest.fn();
+const mockGenerateAuthUrl = jest.fn();
 
 jest.mock("googleapis", () => {
   const mockOAuth2 = jest.fn(() => ({
@@ -39,7 +40,7 @@ jest.mock("googleapis", () => {
     getTokenInfo: mockGetTokenInfo,
     setCredentials: jest.fn(),
     on: jest.fn(),
-    generateAuthUrl: jest.fn(),
+    generateAuthUrl: mockGenerateAuthUrl,
   }));
 
   return {
@@ -288,6 +289,10 @@ describe("OAuth Auth — GET /api/calendar/auth", () => {
 
   it("should redirect to Google OAuth consent screen when authenticated", async () => {
     mockSession("user-1");
+
+    mockGenerateAuthUrl.mockReturnValue(
+      "https://accounts.google.com/o/oauth2/v2/auth?scope=calendar.events+calendar.readonly&access_type=offline&prompt=consent&state=test-state"
+    );
 
     const { GET } = await import("@/app/api/calendar/auth/route");
     const response = await GET();

@@ -20,7 +20,7 @@ const mockCalendarRepo = {
   upsertTokens: jest.fn(),
   delete: jest.fn(),
   updateLastSyncedAt: jest.fn(),
-  updateStatus: jest.fn(),
+  updateStatus: jest.fn().mockResolvedValue(undefined),
 };
 
 jest.mock("@/repositories/calendar.repository", () => ({

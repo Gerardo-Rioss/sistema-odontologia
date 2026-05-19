@@ -532,7 +532,7 @@ export class CalendarService {
     error?: string
   ): SyncResult {
     return {
-      success: !error,
+      success: action !== "none" && !error,
       action,
       googleEventId,
       localAppointmentId,
