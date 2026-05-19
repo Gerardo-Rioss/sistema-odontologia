@@ -44,7 +44,7 @@ export class ConversationService {
     const cleaned = text.trim().toLowerCase();
 
     // Greeting: hola, buenos días, buenas tardes, buenas noches
-    if (/\b(hola|buenos?\s*(d[ií]as|tardes|noches))\b/.test(cleaned)) {
+    if (/\b(hola|buen[ao]s?\s*(d[ií]as|tardes|noches))\b/.test(cleaned)) {
       return "greeting";
     }
 
@@ -58,13 +58,15 @@ export class ConversationService {
       return "schedule_appointment";
     }
 
-    // Check hours: horario, disponible, disponibilidad
-    if (/\b(horario|disponible|disponibilidad)\b/.test(cleaned)) {
+    // Check hours: horario(s), disponible, disponibilidad
+    if (/\b(horarios?|disponible|disponibilidad)\b/.test(cleaned)) {
       return "check_hours";
     }
 
     // Help: ayuda, opciones, menú
-    if (/\b(ayuda|opciones|men[uú])\b/.test(cleaned)) {
+    // `menú` contains a non-ASCII character (ú) which breaks \b,
+    // so it is matched separately via includes().
+    if (/\b(ayuda|opciones)\b/.test(cleaned) || /\bmenu\b/.test(cleaned) || cleaned.includes("menú")) {
       return "help";
     }
 
