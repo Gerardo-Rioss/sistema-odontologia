@@ -45,11 +45,11 @@ Chain strategy: stacked-to-main
 
 ## Phase 3: Quality Gates — E2E + A11y
 
-- [ ] 3.1 Create `tests/e2e/auth.spec.ts`: login → dashboard redirect smoke; logout → login redirect
-- [ ] 3.2 Create `tests/e2e/appointment.spec.ts`: create appointment via modal → visible in list
-- [ ] 3.3 Create `tests/e2e/navigation.spec.ts`: dashboard renders within 5s; patient CRUD flow with UI confirmation
-- [ ] 3.4 Add jest-axe audits in `tests/a11y/` for Modal, CalendarView, Table, and form inputs — target zero violations
-- [ ] 3.5 Fix WCAG violations found: 4.5:1 color contrast, accessible input labels, modal focus trapping, keyboard operability
+- [x] 3.1 Create `tests/e2e/auth.spec.ts`: login → dashboard redirect smoke; logout → login redirect
+- [x] 3.2 Create `tests/e2e/appointment.spec.ts`: create appointment via modal → visible in list
+- [x] 3.3 Create `tests/e2e/navigation.spec.ts`: dashboard renders within 5s; patient CRUD flow with UI confirmation
+- [x] 3.4 Add jest-axe audits in `tests/a11y/` for Modal, CalendarView, Table, and form inputs — target zero violations
+- [x] 3.5 Fix WCAG violations found: 4.5:1 color contrast, accessible input labels, modal focus trapping, keyboard operability
 
 ## Phase 4: Production Polish — SEO + Performance
 
