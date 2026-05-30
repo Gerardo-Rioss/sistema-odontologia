@@ -110,29 +110,29 @@ describe("detectIntent — keyword matching", () => {
 describe("parseDate — parsing de fechas", () => {
   it('debe reconocer "hoy" como la fecha actual', () => {
     const today = new Date();
-    const expected = today.toISOString().slice(0, 10);
+    const expected = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, "0")}-${today.getDate().toString().padStart(2, "0")}T12:00:00`;
     expect(service.parseDate("hoy")).toBe(expected);
   });
 
   it('debe reconocer "mañana" como la fecha de mañana', () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const expected = tomorrow.toISOString().slice(0, 10);
+    const expected = `${tomorrow.getFullYear()}-${(tomorrow.getMonth() + 1).toString().padStart(2, "0")}-${tomorrow.getDate().toString().padStart(2, "0")}T12:00:00`;
     expect(service.parseDate("mañana")).toBe(expected);
   });
 
   it('debe reconocer "DD/MM" con año actual', () => {
     const currentYear = new Date().getFullYear();
     const result = service.parseDate("15/06");
-    expect(result).toBe(`${currentYear}-06-15`);
+    expect(result).toBe(`${currentYear}-06-15T12:00:00`);
   });
 
   it('debe reconocer "DD/MM/YYYY" con año explícito', () => {
-    expect(service.parseDate("15/06/2026")).toBe("2026-06-15");
+    expect(service.parseDate("15/06/2026")).toBe("2026-06-15T12:00:00");
   });
 
   it('debe reconocer "01/01/2026"', () => {
-    expect(service.parseDate("01/01/2026")).toBe("2026-01-01");
+    expect(service.parseDate("01/01/2026")).toBe("2026-01-01T12:00:00");
   });
 
   it("debe retornar null para fechas inválidas (Feb 30)", () => {
