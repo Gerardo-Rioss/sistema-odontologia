@@ -37,6 +37,27 @@ enum CalendarConnectionStatus {
   EXPIRED
 }
 
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageTypeEnum {
+  TEXT
+  TEMPLATE
+  INTERACTIVE
+}
+
+enum ConversationStateEnum {
+  IDLE
+  GREETING
+  SERVICE_SELECTION
+  DATE_SELECTION
+  TIME_SELECTION
+  CONFIRMATION
+  COMPLETED
+}
+
 // ─── Modelos ───────────────────────────────────────────────────
 model User {
   id             String   @id @default(cuid())
@@ -57,6 +78,7 @@ model User {
 
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
+  whatsappMessages WhatsAppMessage[]
 
   @@map("users")
 }
@@ -105,10 +127,11 @@ model Appointment {
   status    AppointmentStatus @default(PENDING)
   type      AppointmentType
   notes     String?
-  googleEventId     String?  @unique
-  googleCalendarId  String?
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  googleEventId         String?  @unique
+  googleCalendarId      String?
+  whatsappReminderSent  String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   patientId String
   patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
@@ -116,7 +139,8 @@ model Appointment {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  messages Message[]
+  messages          Message[]
+  whatsappMessages  WhatsAppMessage[]
 
   @@map("appointments")
 }
@@ -147,4 +171,34 @@ model PasswordResetToken {
   createdAt DateTime @default(now())
 
   @@map("password_reset_tokens")
+}
+
+model WhatsAppMessage {
+  id            String          @id @default(cuid())
+  waMessageId   String          @unique
+  phoneNumber   String
+  body          String
+  direction     MessageDirection
+  messageType   MessageTypeEnum @default(TEXT)
+  templateName  String?
+  userId        String?
+  user          User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  appointmentId String?
+  appointment   Appointment?    @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  createdAt     DateTime        @default(now())
+
+  @@map("whatsapp_messages")
+}
+
+model ConversationState {
+  id           String                @id @default(cuid())
+  phoneNumber  String
+  currentState ConversationStateEnum @default(IDLE)
+  context      Json                  @default("{}")
+  expiresAt    DateTime?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  @@index([phoneNumber])
+  @@map("conversation_states")
 }

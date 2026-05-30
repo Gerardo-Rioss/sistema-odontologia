@@ -53,10 +53,10 @@ Chain strategy: stacked-to-main
 
 ## Phase 4: Production Polish — SEO + Performance
 
-- [ ] 4.1 Split `src/app/(dashboard)/layout.tsx` into server layout (metadata export) + `DashboardClientLayout.tsx` ("use client" providers wrapper)
-- [ ] 4.2 Add `metadata` export to root `page.tsx`, `(auth)/layout.tsx`, and all 10 page routes — non-empty `title` and `description`
-- [ ] 4.3 Create `src/app/sitemap.ts`: `sitemap.xml` with `url`, `lastModified`, `changeFrequency`, `priority`; exclude `/dashboard/` and `/api/`
-- [ ] 4.4 Create `src/app/robots.ts`: `Allow: /`, `Disallow: /dashboard/`, `Disallow: /api/`
-- [ ] 4.5 Wrap `StatsCard`, `StatusBadge`, `EmptyState`, `Spinner` exports with `React.memo`
-- [ ] 4.6 Dynamic import Recharts in `statistics/page.tsx` via `next/dynamic(() => import('recharts'), { ssr: false })`
-- [ ] 4.7 Replace static `<img>` with `next/image` + `priority` on above-fold images; verify `npm run lint` + `npm run type-check` pass
+- [x] 4.1 Split `src/app/(dashboard)/layout.tsx` into server layout (metadata export) + `DashboardClientLayout.tsx` ("use client" providers wrapper)
+- [x] 4.2 Add `metadata` export to root `page.tsx`, `(auth)/layout.tsx`, and all 10 page routes — non-empty `title` and `description`
+- [x] 4.3 Create `src/app/sitemap.ts`: `sitemap.xml` with `url`, `lastModified`, `changeFrequency`, `priority`; exclude `/dashboard/` and `/api/`
+- [x] 4.4 Create `src/app/robots.ts`: `Allow: /`, `Disallow: /dashboard/`, `Disallow: /api/`
+- [x] 4.5 Wrap `StatsCard`, `StatusBadge`, `EmptyState`, `Spinner` exports with `React.memo`
+- [x] 4.6 Dynamic import Recharts in `statistics/page.tsx` via `next/dynamic(() => import('./ChartsSection'), { ssr: false })` — extracted chart rendering to ChartsSection.tsx for clean dynamic import
+- [x] 4.7 Replace static `<img>` with `next/image` + `priority` on above-fold images — N/A: proyecto no contiene imágenes estáticas (usa SVG inline exclusivamente). Lint + type-check pasan.

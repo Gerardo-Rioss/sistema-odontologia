@@ -131,3 +131,6 @@ export class MapRateLimiterStore implements RateLimiterStore {
     }
   }
 }
+
+/** Instancia singleton del rate limiter (5 req / 15 min window). */
+export const rateLimiter = new MapRateLimiterStore();

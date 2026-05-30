@@ -1,3 +1,22 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: {
+    template: "%s | Sistema Odontológico",
+    default: "Acceso | Sistema Odontológico",
+  },
+  description:
+    "Iniciá sesión o registrate para acceder al sistema de gestión odontológica.",
+  openGraph: {
+    title: "Acceso | Sistema Odontológico",
+    description:
+      "Iniciá sesión o registrate para acceder al sistema de gestión odontológica.",
+    type: "website",
+    locale: "es_AR",
+    siteName: "Sistema Odontológico",
+  },
+};
+
 /**
  * Auth layout — pantalla centrada con tarjeta para login y registro.
  * Las páginas dentro de (auth) heredan este layout automáticamente.
