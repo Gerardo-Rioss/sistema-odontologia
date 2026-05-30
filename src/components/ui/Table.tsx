@@ -69,15 +69,15 @@ export function Table<T extends { id: string }>({
   if (isLoading) {
     return (
       <div
-        className={cn("overflow-x-auto rounded-xl bg-white shadow-sm", className)}
+        className={cn("overflow-x-auto rounded-xl bg-white shadow-sm dark:bg-gray-900", className)}
       >
         <table className="w-full" role="table">
           <thead>
-            <tr className="border-b bg-gray-50">
+            <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800">
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
                 >
                   {col.header}
                 </th>
@@ -89,7 +89,7 @@ export function Table<T extends { id: string }>({
               <tr key={i} className="border-b">
                 {columns.map((col) => (
                   <td key={col.key} className="px-6 py-4">
-                    <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
                   </td>
                 ))}
               </tr>
@@ -103,7 +103,7 @@ export function Table<T extends { id: string }>({
   // Estado vacío
   if (data.length === 0 && emptyState) {
     return (
-      <div className={cn("rounded-xl bg-white shadow-sm", className)}>
+      <div className={cn("rounded-xl bg-white shadow-sm dark:bg-gray-900", className)}>
         {emptyState}
       </div>
     );
@@ -111,7 +111,7 @@ export function Table<T extends { id: string }>({
 
   return (
     <div
-      className={cn("overflow-x-auto rounded-xl bg-white shadow-sm", className)}
+      className={cn("overflow-x-auto rounded-xl bg-white shadow-sm dark:bg-gray-900", className)}
     >
       <table className="w-full" role="table">
         <thead>
@@ -120,8 +120,8 @@ export function Table<T extends { id: string }>({
               <th
                 key={col.key}
                 className={cn(
-                  "px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500",
-                  col.sortable && "cursor-pointer select-none hover:text-gray-700",
+                  "px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400",
+                  col.sortable && "cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200",
                   col.className
                 )}
                 aria-sort={
@@ -150,7 +150,7 @@ export function Table<T extends { id: string }>({
             <tr
               key={row.id}
               className={cn(
-                "border-b transition-colors hover:bg-gray-50",
+                "border-b border-gray-200 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800",
                 onRowClick && "cursor-pointer"
               )}
               onClick={() => onRowClick?.(row)}
@@ -158,7 +158,7 @@ export function Table<T extends { id: string }>({
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className={cn("px-6 py-4 text-sm text-gray-900", col.className)}
+                  className={cn("px-6 py-4 text-sm text-gray-900 dark:text-gray-100", col.className)}
                 >
                   {col.render(row)}
                 </td>

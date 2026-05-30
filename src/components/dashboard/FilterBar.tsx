@@ -72,14 +72,14 @@ export function FilterBar({
 
   return (
     <div
-      className={`flex flex-wrap items-center gap-3 rounded-xl bg-white p-4 shadow-sm ${className ?? ""}`}
+      className={`flex flex-wrap items-center gap-3 rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900 ${className ?? ""}`}
     >
       {/* Filtro de estado */}
       {showStatusFilter && (
         <div className="flex items-center gap-2">
           <label
             htmlFor="filter-status"
-            className="text-xs font-medium text-gray-500"
+            className="text-xs font-medium text-gray-500 dark:text-gray-400"
           >
             Estado
           </label>
@@ -90,7 +90,7 @@ export function FilterBar({
               const val = e.target.value;
               setStatusFilter(val === "ALL" ? null : (val as AppointmentStatus));
             }}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
           >
             {statusOptions.map((s) => (
               <option key={s} value={s}>
@@ -106,7 +106,7 @@ export function FilterBar({
         <div className="flex items-center gap-2">
           <label
             htmlFor="filter-date"
-            className="text-xs font-medium text-gray-500"
+            className="text-xs font-medium text-gray-500 dark:text-gray-400"
           >
             Fecha
           </label>
@@ -115,7 +115,7 @@ export function FilterBar({
             type="date"
             value={dateFilter ?? ""}
             onChange={(e) => setDateFilter(e.target.value || null)}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
           />
         </div>
       )}
@@ -146,7 +146,7 @@ export function FilterBar({
               placeholder={searchPlaceholder}
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 py-1.5 pl-10 pr-3 text-sm text-gray-700 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-300 py-1.5 pl-10 pr-3 text-sm text-gray-700 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:text-gray-300 dark:placeholder:text-gray-500"
             />
           </div>
         </div>
@@ -156,7 +156,7 @@ export function FilterBar({
       {hasActiveFilters && (
         <button
           onClick={handleReset}
-          className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+          className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
         >
           Limpiar filtros
         </button>

@@ -233,10 +233,10 @@ export default function PatientsPage() {
       </div>
 
       {/* Barra de búsqueda */}
-      <div className="rounded-xl bg-white p-4 shadow-sm">
+      <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900">
         <div className="relative">
           <svg
-            className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+            className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -249,13 +249,13 @@ export default function PatientsPage() {
             placeholder="Buscar paciente por nombre..."
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 py-2.5 pl-11 pr-10 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg border border-gray-300 py-2.5 pl-11 pr-10 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:text-gray-100 dark:placeholder:text-gray-500"
             aria-label="Buscar paciente"
           />
           {localSearch && (
             <button
               onClick={handleClearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               aria-label="Limpiar búsqueda"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -268,9 +268,9 @@ export default function PatientsPage() {
 
       {/* Estado de error */}
       {patientsError && (
-        <div className="rounded-xl bg-red-50 p-6 text-center shadow-sm" role="alert">
-          <p className="text-sm font-medium text-red-800">Error al cargar pacientes</p>
-          <p className="mt-1 text-sm text-red-600">{patientsError.message}</p>
+        <div className="rounded-xl bg-red-50 p-6 text-center shadow-sm dark:bg-red-950" role="alert">
+          <p className="text-sm font-medium text-red-800 dark:text-red-300">Error al cargar pacientes</p>
+          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{patientsError.message}</p>
           <Button variant="ghost" size="sm" className="mt-3" onClick={() => refetchPatients()}>
             Reintentar
           </Button>
@@ -286,7 +286,7 @@ export default function PatientsPage() {
 
       {/* Tabla de pacientes */}
       {!patientsLoading && !patientsError && (
-        <div className="rounded-xl bg-white shadow-sm">
+        <div className="rounded-xl bg-white shadow-sm dark:bg-gray-900">
           <Table
             columns={columns}
             data={patients}
@@ -297,15 +297,15 @@ export default function PatientsPage() {
 
           {/* Expansión inline: últimas citas del paciente */}
           {expandedId && expandedAppointments.length > 0 && (
-            <div className="border-t bg-gray-50 p-4">
-              <h3 className="mb-3 text-sm font-semibold text-gray-700">
+            <div className="border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800">
+              <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Últimas citas
               </h3>
               <div className="space-y-2">
                 {expandedAppointments.slice(0, 5).map((apt) => (
                   <div
                     key={apt.id}
-                    className="flex items-center justify-between rounded-lg bg-white px-4 py-2.5 shadow-sm"
+                    className="flex items-center justify-between rounded-lg bg-white px-4 py-2.5 shadow-sm dark:bg-gray-900"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-gray-900">
@@ -334,7 +334,7 @@ export default function PatientsPage() {
           )}
 
           {expandedId && expandedAppointments.length === 0 && (
-            <div className="border-t bg-gray-50 p-4">
+            <div className="border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800">
               <p className="text-sm text-gray-500">No hay citas registradas para este paciente.</p>
             </div>
           )}

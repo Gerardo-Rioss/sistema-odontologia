@@ -21,11 +21,11 @@ export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
 
 /** Colores de fondo y texto para badges de tipo de cita (Tailwind). */
 export const APPOINTMENT_TYPE_COLORS: Record<AppointmentType, string> = {
-  LIMPIEZA: "bg-green-100 text-green-800",
-  REVISION: "bg-blue-100 text-blue-800",
-  URGENCIA: "bg-red-100 text-red-800",
-  TRATAMIENTO: "bg-yellow-100 text-yellow-800",
-  OTRO: "bg-gray-100 text-gray-800",
+  LIMPIEZA: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+  REVISION: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  URGENCIA: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+  TRATAMIENTO: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+  OTRO: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
 };
 
 // ─── Etiquetas y colores de estado de cita ────────────────────
@@ -42,10 +42,10 @@ export const STATUS_LABELS: Record<AppointmentStatus, string> = {
  * PENDING → amarillo, CONFIRMED → verde, CANCELLED → rojo, COMPLETED → azul.
  */
 export const STATUS_COLORS: Record<AppointmentStatus, string> = {
-  PENDING: "bg-yellow-100 text-yellow-800",
-  CONFIRMED: "bg-green-100 text-green-800",
-  CANCELLED: "bg-red-100 text-red-800",
-  COMPLETED: "bg-blue-100 text-blue-800",
+  PENDING: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+  CONFIRMED: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+  CANCELLED: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+  COMPLETED: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
 };
 
 // ─── Días de la semana ────────────────────────────────────────

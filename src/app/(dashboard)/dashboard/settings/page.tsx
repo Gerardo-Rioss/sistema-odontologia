@@ -101,10 +101,10 @@ export default function SettingsPage() {
 
       {/* ── Connected Banner ─────────────────────────────────── */}
       {showConnectedBanner && (
-        <div className="rounded-xl bg-green-50 border border-green-200 p-4">
+        <div className="rounded-xl bg-green-50 border border-green-200 p-4 dark:bg-green-950 dark:border-green-800">
           <div className="flex items-center gap-2">
-            <span className="text-green-600 text-lg">✓</span>
-            <p className="text-sm font-medium text-green-800">
+            <span className="text-green-600 text-lg dark:text-green-400">✓</span>
+            <p className="text-sm font-medium text-green-800 dark:text-green-300">
               Google Calendar conectado exitosamente
             </p>
           </div>
@@ -112,7 +112,7 @@ export default function SettingsPage() {
       )}
 
       {/* ── Google Calendar Section ──────────────────────────── */}
-      <div className="rounded-xl bg-white p-6 shadow-sm">
+      <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-900">
         <h2 className="text-lg font-semibold text-gray-900">
           Google Calendar
         </h2>
@@ -151,11 +151,11 @@ export default function SettingsPage() {
               <button
                 onClick={handleDisconnect}
                 disabled={disconnecting}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
               >
                 {disconnecting ? (
                   <>
-                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-red-300 border-t-red-600" />
+                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-red-300 border-t-red-600 dark:border-red-700 dark:border-t-red-400" />
                     Desconectando...
                   </>
                 ) : (
@@ -166,8 +166,8 @@ export default function SettingsPage() {
           ) : (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-gray-300" />
-                <span className="text-sm font-medium text-gray-500">
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-gray-300 dark:bg-gray-600" />
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                   No conectado
                 </span>
               </div>
@@ -197,7 +197,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Clinic Data Section ──────────────────────────────── */}
-      <div className="rounded-xl bg-white p-6 shadow-sm">
+      <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-900">
         <h2 className="text-lg font-semibold text-gray-900">
           Datos del Consultorio
         </h2>
@@ -210,7 +210,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Notification Preferences ──────────────────────────── */}
-      <div className="rounded-xl bg-white p-6 shadow-sm">
+      <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-900">
         <h2 className="text-lg font-semibold text-gray-900">
           Preferencias de Notificación
         </h2>

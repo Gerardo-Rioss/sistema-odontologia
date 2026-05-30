@@ -28,7 +28,7 @@ export const Spinner = React.memo(function Spinner({ size = "md", className }: S
       className={cn("inline-block", className)}
     >
       <svg
-        className={cn("animate-spin text-blue-600", sizeClasses[size])}
+        className={cn("animate-spin text-blue-600 dark:text-blue-400", sizeClasses[size])}
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"

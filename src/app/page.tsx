@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-8">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-8 dark:bg-gray-950">
       <div className="max-w-md text-center">
         <h1 className="text-4xl font-bold text-gray-900">
           Sistema de Gestión Odontológica
@@ -36,26 +36,26 @@ export default function Home() {
           </Link>
           <Link
             href="/register"
-            className="rounded-lg border border-blue-600 px-6 py-3 font-medium text-blue-600 transition hover:bg-blue-50"
+            className="rounded-lg border border-blue-600 px-6 py-3 font-medium text-blue-600 transition hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950"
           >
             Registrarse
           </Link>
         </div>
 
         <div className="mt-12 grid grid-cols-1 gap-4 text-left sm:grid-cols-3">
-          <div className="rounded-lg border bg-white p-4">
+          <div className="rounded-lg border bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
             <h3 className="font-semibold">📅 Citas</h3>
             <p className="mt-1 text-sm text-gray-500">
               Agendá, modificá y cancelá turnos con un clic.
             </p>
           </div>
-          <div className="rounded-lg border bg-white p-4">
+          <div className="rounded-lg border bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
             <h3 className="font-semibold">👥 Pacientes</h3>
             <p className="mt-1 text-sm text-gray-500">
               Historial completo y datos de contacto centralizados.
             </p>
           </div>
-          <div className="rounded-lg border bg-white p-4">
+          <div className="rounded-lg border bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
             <h3 className="font-semibold">📊 Estadísticas</h3>
             <p className="mt-1 text-sm text-gray-500">
               Ingresos, tasa de cancelación y tendencias en gráficos.

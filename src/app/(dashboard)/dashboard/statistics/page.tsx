@@ -80,11 +80,11 @@ export default function StatisticsPage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900">Estadísticas</h1>
-        <div className="rounded-xl bg-red-50 p-6 text-center shadow-sm" role="alert">
-          <p className="text-sm font-medium text-red-800">
+        <div className="rounded-xl bg-red-50 p-6 text-center shadow-sm dark:bg-red-950" role="alert">
+          <p className="text-sm font-medium text-red-800 dark:text-red-300">
             Error al cargar estadísticas
           </p>
-          <p className="mt-1 text-sm text-red-600">{error}</p>
+          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
         </div>
       </div>
     );
@@ -109,7 +109,7 @@ export default function StatisticsPage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900">Estadísticas</h1>
-        <div className="rounded-xl bg-white p-12 text-center shadow-sm">
+        <div className="rounded-xl bg-white p-12 text-center shadow-sm dark:bg-gray-900">
           <svg
             className="mx-auto h-16 w-16 text-gray-400"
             fill="none"
@@ -173,19 +173,19 @@ export default function StatisticsPage() {
 
       {/* Nuevos vs recurrentes (mini cards) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-xl bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-gray-500">Pacientes nuevos</p>
-          <p className="mt-1 text-3xl font-bold text-blue-600">
+        <div className="rounded-xl bg-white p-5 shadow-sm dark:bg-gray-900">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pacientes nuevos</p>
+          <p className="mt-1 text-3xl font-bold text-blue-600 dark:text-blue-400">
             {newVsReturning.newPatients}
           </p>
-          <p className="text-xs text-gray-400">Con 1 sola cita en 12 meses</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Con 1 sola cita en 12 meses</p>
         </div>
-        <div className="rounded-xl bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-gray-500">Pacientes recurrentes</p>
-          <p className="mt-1 text-3xl font-bold text-green-600">
+        <div className="rounded-xl bg-white p-5 shadow-sm dark:bg-gray-900">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pacientes recurrentes</p>
+          <p className="mt-1 text-3xl font-bold text-green-600 dark:text-green-400">
             {newVsReturning.returningPatients}
           </p>
-          <p className="text-xs text-gray-400">Con 2 o más citas en 12 meses</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Con 2 o más citas en 12 meses</p>
         </div>
       </div>
 

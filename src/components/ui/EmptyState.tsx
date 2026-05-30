@@ -30,7 +30,7 @@ export const EmptyState = React.memo(function EmptyState({
       )}
     >
       {icon && <div className="mb-4 text-gray-500">{icon}</div>}
-      <p className="text-sm text-gray-500">{message}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>
   );

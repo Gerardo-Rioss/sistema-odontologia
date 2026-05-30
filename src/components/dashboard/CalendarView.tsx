@@ -77,7 +77,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
   // ── Estado de carga / error ──
   if (isLoading) {
     return (
-      <div className={cn("flex items-center justify-center rounded-xl bg-white p-12 shadow-sm", className)}>
+      <div className={cn("flex items-center justify-center rounded-xl bg-white p-12 shadow-sm dark:bg-gray-900", className)}>
         <Spinner size="lg" />
       </div>
     );
@@ -85,20 +85,20 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
 
   if (error) {
     return (
-      <div className={cn("rounded-xl bg-red-50 p-6 text-center shadow-sm", className)} role="alert">
-        <p className="text-sm text-red-600">{error}</p>
+      <div className={cn("rounded-xl bg-red-50 p-6 text-center shadow-sm dark:bg-red-950", className)} role="alert">
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className={cn("rounded-xl bg-white shadow-sm", className)}>
+    <div className={cn("rounded-xl bg-white shadow-sm dark:bg-gray-900", className)}>
       {/* Cabecera: navegación + vista */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-4 py-3 dark:border-gray-800">
         <div className="flex items-center gap-2">
           <button
             onClick={goToPrev}
-            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
             aria-label={`${currentView === "month" ? "Mes" : currentView === "week" ? "Semana" : "Día"} anterior`}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -112,7 +112,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
 
           <button
             onClick={goToNext}
-            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
             aria-label={`${currentView === "month" ? "Mes" : currentView === "week" ? "Semana" : "Día"} siguiente`}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -123,7 +123,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
 
         <div className="flex items-center gap-3">
           {/* Selector de vista */}
-          <div className="flex rounded-lg border border-gray-200 bg-gray-50 p-0.5">
+          <div className="flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 dark:border-gray-700 dark:bg-gray-800">
             {(Object.entries(VIEW_LABELS) as [CalendarView, string][]).map(([view, label]) => (
               <button
                 key={view}
@@ -131,8 +131,8 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
                 className={cn(
                   "rounded-md px-3 py-1 text-xs font-medium transition-colors",
                   currentView === view
-                    ? "bg-white text-blue-700 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
+                    ? "bg-white text-blue-700 shadow-sm dark:bg-gray-700 dark:text-blue-400"
+                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 )}
               >
                 {label}
@@ -143,7 +143,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
           {/* Botón Hoy */}
           <button
             onClick={goToToday}
-            className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50"
+            className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
           >
             Hoy
           </button>
@@ -158,7 +158,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
             {SHORT_DAY_NAMES.map((day) => (
               <div
                 key={day}
-                className="py-1 text-center text-xs font-medium uppercase text-gray-500"
+                className="py-1 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400"
               >
                 {day}
               </div>
@@ -199,7 +199,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
                   !day.isCurrentMonth && !today && "opacity-40",
                   today
                     ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "hover:bg-gray-100",
+                    : "hover:bg-gray-100 dark:hover:bg-gray-800",
                   currentView === "day" && "flex-row items-start gap-3 p-4"
                 )}
               >
@@ -207,7 +207,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
                 <span
                   className={cn(
                     "text-xs font-medium",
-                    today ? "text-white" : "text-gray-800",
+                    today ? "text-white" : "text-gray-800 dark:text-gray-200",
                     currentView === "day" && "text-lg"
                   )}
                 >
@@ -239,7 +239,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
                     {day.appointments.map((apt: AppointmentListItem) => (
                       <div
                         key={apt.id}
-                        className="rounded bg-gray-50 px-2 py-1 text-xs text-gray-600"
+                        className="rounded bg-gray-50 px-2 py-1 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400"
                       >
                         <span className="font-medium">{apt.time}</span> —{" "}
                         {apt.patient.name}
@@ -256,7 +256,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
       {/* Leyenda de colores */}
       <div className="flex flex-wrap gap-3 border-t px-4 py-3">
         {Object.entries(APPOINTMENT_DOT_COLORS).map(([type, color]) => (
-          <div key={type} className="flex items-center gap-1.5 text-xs text-gray-500">
+          <div key={type} className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
             <span className={cn("h-2 w-2 rounded-full", color)} />
             {APPOINTMENT_TYPE_LABELS[type as keyof typeof APPOINTMENT_TYPE_LABELS]}
           </div>

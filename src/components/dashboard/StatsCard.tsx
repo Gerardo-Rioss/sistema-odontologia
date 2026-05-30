@@ -29,28 +29,28 @@ interface StatsCardProps {
 const accentStyles: Record<NonNullable<StatsCardProps["accent"]>, { border: string; icon: string; bg: string }> = {
   blue: {
     border: "border-l-blue-500",
-    icon: "text-blue-600 bg-blue-50",
-    bg: "bg-blue-50/50",
+    icon: "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950",
+    bg: "bg-blue-50/50 dark:bg-blue-950/50",
   },
   green: {
     border: "border-l-green-500",
-    icon: "text-green-600 bg-green-50",
-    bg: "bg-green-50/50",
+    icon: "text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950",
+    bg: "bg-green-50/50 dark:bg-green-950/50",
   },
   yellow: {
     border: "border-l-yellow-500",
-    icon: "text-yellow-600 bg-yellow-50",
-    bg: "bg-yellow-50/50",
+    icon: "text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-950",
+    bg: "bg-yellow-50/50 dark:bg-yellow-950/50",
   },
   red: {
     border: "border-l-red-500",
-    icon: "text-red-600 bg-red-50",
-    bg: "bg-red-50/50",
+    icon: "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950",
+    bg: "bg-red-50/50 dark:bg-red-950/50",
   },
   purple: {
     border: "border-l-purple-500",
-    icon: "text-purple-600 bg-purple-50",
-    bg: "bg-purple-50/50",
+    icon: "text-purple-600 bg-purple-50 dark:text-purple-400 dark:bg-purple-950",
+    bg: "bg-purple-50/50 dark:bg-purple-950/50",
   },
 };
 
@@ -78,12 +78,12 @@ export const StatsCard = React.memo(function StatsCard({
     return (
       <div
         className={cn(
-          "rounded-xl border border-red-200 bg-red-50 p-6",
+          "rounded-xl border border-red-200 bg-red-50 p-6 dark:border-red-800 dark:bg-red-950",
           className
         )}
         role="alert"
       >
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
       </div>
     );
   }
@@ -91,7 +91,7 @@ export const StatsCard = React.memo(function StatsCard({
   return (
     <div
       className={cn(
-        "rounded-xl border-l-4 bg-white p-6 shadow-sm transition-shadow hover:shadow-md",
+        "rounded-xl border-l-4 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:bg-gray-900",
         styles.border,
         className
       )}
@@ -112,9 +112,9 @@ export const StatsCard = React.memo(function StatsCard({
           {loading ? (
             <Spinner size="sm" />
           ) : (
-            <p className="text-2xl font-bold text-gray-900">{value}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
           )}
-          <p className="text-sm text-gray-500">{label}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
         </div>
       </div>
 
@@ -122,8 +122,8 @@ export const StatsCard = React.memo(function StatsCard({
       {trend && (
         <div className="mt-4 flex items-center gap-1">
           {trend.direction === "up" ? (
-            <svg
-              className="h-4 w-4 text-green-600"
+              <svg
+                className="h-4 w-4 text-green-600 dark:text-green-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -136,8 +136,8 @@ export const StatsCard = React.memo(function StatsCard({
               />
             </svg>
           ) : (
-            <svg
-              className="h-4 w-4 text-red-600"
+              <svg
+                className="h-4 w-4 text-red-600 dark:text-red-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -153,7 +153,7 @@ export const StatsCard = React.memo(function StatsCard({
           <span
             className={cn(
               "text-xs font-medium",
-              trend.direction === "up" ? "text-green-600" : "text-red-600"
+              trend.direction === "up" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
             )}
           >
             {trend.value}%

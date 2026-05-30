@@ -67,10 +67,10 @@ export default function ForgotPasswordPage() {
   };
 
   const inputClass = (fieldError: unknown) =>
-    `mt-1 block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 ${
+    `mt-1 block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 dark:text-gray-100 dark:placeholder:text-gray-500 ${
       fieldError
-        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-        : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+        ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-700"
+        : "border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700"
     }`;
 
   return (
@@ -86,24 +86,24 @@ export default function ForgotPasswordPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-400">
           {error}
         </div>
       )}
       {message && (
-        <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700">
+        <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-400">
           {message}
         </div>
       )}
       {resetToken && (
-        <div className="rounded-lg bg-blue-50 p-3 text-sm">
-          <p className="font-medium text-blue-800">
+        <div className="rounded-lg bg-blue-50 p-3 text-sm dark:bg-blue-950">
+          <p className="font-medium text-blue-800 dark:text-blue-300">
             Token de recuperación (modo desarrollo):
           </p>
-          <code className="mt-1 block break-all text-blue-900">
+          <code className="mt-1 block break-all text-blue-900 dark:text-blue-200">
             {resetToken}
           </code>
-          <p className="mt-2 text-blue-700">
+          <p className="mt-2 text-blue-700 dark:text-blue-400">
             <Link
               href={`/reset-password?token=${encodeURIComponent(resetToken)}`}
               className="font-medium underline"
@@ -137,13 +137,13 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+          className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:focus:ring-offset-gray-900"
         >
           {isLoading ? "Enviando..." : "Enviar Instrucciones"}
         </button>
       </form>
 
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm text-gray-500 dark:text-gray-400">
         <Link
           href="/login"
           className="font-medium text-blue-600 hover:text-blue-500"

@@ -115,19 +115,19 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          "relative z-10 w-full rounded-xl bg-white shadow-xl",
+          "relative z-10 w-full rounded-xl bg-white shadow-xl dark:bg-gray-900",
           sizeClasses[size],
           className
         )}
       >
         {/* Cabecera */}
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 id={titleId} className="text-lg font-semibold text-gray-900">
+        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+          <h2 id={titleId} className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
             aria-label="Cerrar"
           >
             <svg
@@ -151,7 +151,7 @@ export function Modal({
 
         {/* Footer opcional (botones de acción) */}
         {footer && (
-          <div className="flex justify-end gap-3 border-t px-6 py-4">
+          <div className="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-800">
             {footer}
           </div>
         )}

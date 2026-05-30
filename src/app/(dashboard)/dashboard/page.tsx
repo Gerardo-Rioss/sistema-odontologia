@@ -53,11 +53,11 @@ export default function DashboardPage() {
   // ── Estado de error general ──
   if (statsError) {
     return (
-      <div className="rounded-xl bg-red-50 p-6 text-center shadow-sm" role="alert">
-        <p className="text-sm font-medium text-red-800">
+      <div className="rounded-xl bg-red-50 p-6 text-center shadow-sm dark:bg-red-950" role="alert">
+        <p className="text-sm font-medium text-red-800 dark:text-red-300">
           Error al cargar estadísticas
         </p>
-        <p className="mt-1 text-sm text-red-600">{statsError}</p>
+        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{statsError}</p>
       </div>
     );
   }
@@ -123,8 +123,8 @@ export default function DashboardPage() {
                 <Spinner size="md" />
               </div>
             ) : appsError ? (
-              <div className="rounded-lg bg-red-50 p-4 text-center" role="alert">
-                <p className="text-sm text-red-600">{appsError.message}</p>
+              <div className="rounded-lg bg-red-50 p-4 text-center dark:bg-red-950" role="alert">
+                <p className="text-sm text-red-600 dark:text-red-400">{appsError.message}</p>
               </div>
             ) : (
               <AppointmentList

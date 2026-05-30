@@ -75,9 +75,9 @@ export function Sidebar() {
   const setSidebarOpen = useStore((s) => s.setSidebarOpen);
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-white shadow-lg">
+    <div className="flex h-full flex-col bg-white shadow-lg dark:bg-gray-900">
       {/* Cabecera del sidebar */}
-      <div className="flex h-16 items-center justify-between border-b px-4">
+        <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4 dark:border-gray-800">
         {sidebarOpen && (
           <span className="text-lg font-bold text-gray-900">
             🦷 Sistema Odontología
@@ -85,7 +85,7 @@ export function Sidebar() {
         )}
         <button
           onClick={toggleSidebar}
-          className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
           aria-label={sidebarOpen ? "Colapsar menú" : "Expandir menú"}
         >
           <svg
@@ -122,8 +122,8 @@ export function Sidebar() {
               className={cn(
                 "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-400"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
               )}
               aria-current={isActive ? "page" : undefined}
             >
@@ -135,7 +135,7 @@ export function Sidebar() {
       </nav>
 
       {/* Pie del sidebar */}
-      <div className="border-t p-4">
+      <div className="border-t border-gray-200 p-4 dark:border-gray-800">
         {sidebarOpen && (
           <p className="text-xs text-gray-500">
             Sistema de Gestión Odontológica v0.1.0
