@@ -335,7 +335,7 @@ export default function PatientsPage() {
 
           {expandedId && expandedAppointments.length === 0 && (
             <div className="border-t bg-gray-50 p-4">
-              <p className="text-sm text-gray-400">No hay citas registradas para este paciente.</p>
+              <p className="text-sm text-gray-500">No hay citas registradas para este paciente.</p>
             </div>
           )}
         </div>

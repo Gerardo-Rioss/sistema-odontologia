@@ -27,7 +27,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   }, [session, hydrateFromSession]);
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-50">
       {/* Sidebar: gestiona su propia responsividad (overlay <768px, fixed ≥768px) */}
       <Sidebar />
 

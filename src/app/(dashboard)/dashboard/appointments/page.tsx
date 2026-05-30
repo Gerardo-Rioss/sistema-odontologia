@@ -104,7 +104,7 @@ export default function AppointmentsPage() {
             "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
             viewMode === "calendar"
               ? "bg-blue-600 text-white shadow-sm"
-              : "bg-white text-gray-600 hover:bg-gray-50",
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200",
           )}
         >
           <svg className="mr-1.5 inline-block h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -118,7 +118,7 @@ export default function AppointmentsPage() {
             "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
             viewMode === "list"
               ? "bg-blue-600 text-white shadow-sm"
-              : "bg-white text-gray-600 hover:bg-gray-50",
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200",
           )}
         >
           <svg className="mr-1.5 inline-block h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

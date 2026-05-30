@@ -122,7 +122,7 @@ export default function SettingsPage() {
 
         <div className="mt-4">
           {loading ? (
-            <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className="flex items-center gap-2 text-sm text-gray-500">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
               Cargando estado...
             </div>
@@ -143,7 +143,7 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-500">
                 Última sincronización:{" "}
                 {formatLastSync(calendarStatus.lastSyncedAt)}
               </p>
@@ -187,7 +187,7 @@ export default function SettingsPage() {
                 Conectar Google Calendar
               </a>
 
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-500">
                 Al conectar, se sincronizarán automáticamente tus citas
                 con Google Calendar.
               </p>
@@ -204,7 +204,7 @@ export default function SettingsPage() {
         <p className="mt-2 text-sm text-gray-500">
           Nombre, dirección, teléfono y horarios de atención.
         </p>
-        <p className="mt-4 text-sm text-gray-400">
+        <p className="mt-4 text-sm text-gray-500">
           La configuración estará disponible próximamente.
         </p>
       </div>
@@ -217,7 +217,7 @@ export default function SettingsPage() {
         <p className="mt-2 text-sm text-gray-500">
           Configurá cómo y cuándo querés recibir notificaciones.
         </p>
-        <p className="mt-4 text-sm text-gray-400">
+        <p className="mt-4 text-sm text-gray-500">
           Las notificaciones se habilitarán en una fase futura.
         </p>
       </div>

@@ -29,7 +29,7 @@ export const EmptyState = React.memo(function EmptyState({
         className
       )}
     >
-      {icon && <div className="mb-4 text-gray-400">{icon}</div>}
+      {icon && <div className="mb-4 text-gray-500">{icon}</div>}
       <p className="text-sm text-gray-500">{message}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>

@@ -60,7 +60,7 @@ export function Header() {
         </button>
 
         {/* Título de página */}
-        <h2 className="text-lg font-semibold text-gray-800">{pageTitle}</h2>
+        <h2 className="text-lg font-semibold text-gray-900">{pageTitle}</h2>
       </div>
 
       {/* Lado derecho: usuario + cerrar sesión */}

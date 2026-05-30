@@ -79,7 +79,7 @@ export function Sidebar() {
       {/* Cabecera del sidebar */}
       <div className="flex h-16 items-center justify-between border-b px-4">
         {sidebarOpen && (
-          <span className="text-lg font-bold text-gray-800">
+          <span className="text-lg font-bold text-gray-900">
             🦷 Sistema Odontología
           </span>
         )}
@@ -137,7 +137,7 @@ export function Sidebar() {
       {/* Pie del sidebar */}
       <div className="border-t p-4">
         {sidebarOpen && (
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-500">
             Sistema de Gestión Odontológica v0.1.0
           </p>
         )}

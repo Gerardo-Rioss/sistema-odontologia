@@ -106,7 +106,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
             </svg>
           </button>
 
-          <h3 className="min-w-[160px] text-center text-base font-semibold text-gray-800">
+          <h3 className="min-w-[160px] text-center text-base font-semibold text-gray-900">
             {periodTitle}
           </h3>
 

@@ -159,7 +159,7 @@ export const StatsCard = React.memo(function StatsCard({
             {trend.value}%
           </span>
           {trend.label && (
-            <span className="text-xs text-gray-400">{trend.label}</span>
+            <span className="text-xs text-gray-500">{trend.label}</span>
           )}
         </div>
       )}
