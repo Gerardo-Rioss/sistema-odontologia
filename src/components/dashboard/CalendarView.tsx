@@ -12,6 +12,7 @@ import {
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/Spinner";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { AppointmentListItem } from "@/types";
 
 // ─── Tipos locales ────────────────────────────────────────────
@@ -77,7 +78,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
   // ── Estado de carga / error ──
   if (isLoading) {
     return (
-      <div className={cn("flex items-center justify-center rounded-xl bg-white p-12 shadow-sm dark:bg-gray-900", className)}>
+      <div className={cn("flex items-center justify-center rounded-xl border bg-card p-12 shadow-sm", className)}>
         <Spinner size="lg" />
       </div>
     );
@@ -85,45 +86,41 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
 
   if (error) {
     return (
-      <div className={cn("rounded-xl bg-red-50 p-6 text-center shadow-sm dark:bg-red-950", className)} role="alert">
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      <div className={cn("rounded-xl border border-destructive/50 bg-destructive/10 p-6 text-center shadow-sm", className)} role="alert">
+        <p className="text-sm text-destructive">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className={cn("rounded-xl bg-white shadow-sm dark:bg-gray-900", className)}>
+    <div className={cn("overflow-hidden rounded-xl border bg-card shadow-sm", className)}>
       {/* Cabecera: navegación + vista */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-4 py-3 dark:border-gray-800">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
         <div className="flex items-center gap-2">
           <button
             onClick={goToPrev}
-            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label={`${currentView === "month" ? "Mes" : currentView === "week" ? "Semana" : "Día"} anterior`}
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
+            <ChevronLeft className="h-5 w-5" />
           </button>
 
-          <h3 className="min-w-[160px] text-center text-base font-semibold text-gray-900">
+          <h3 className="min-w-[160px] text-center text-base font-semibold text-foreground">
             {periodTitle}
           </h3>
 
           <button
             onClick={goToNext}
-            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label={`${currentView === "month" ? "Mes" : currentView === "week" ? "Semana" : "Día"} siguiente`}
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
+            <ChevronRight className="h-5 w-5" />
           </button>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Selector de vista */}
-          <div className="flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex rounded-lg border bg-muted/50 p-0.5">
             {(Object.entries(VIEW_LABELS) as [CalendarView, string][]).map(([view, label]) => (
               <button
                 key={view}
@@ -131,8 +128,8 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
                 className={cn(
                   "rounded-md px-3 py-1 text-xs font-medium transition-colors",
                   currentView === view
-                    ? "bg-white text-blue-700 shadow-sm dark:bg-gray-700 dark:text-blue-400"
-                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {label}
@@ -143,7 +140,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
           {/* Botón Hoy */}
           <button
             onClick={goToToday}
-            className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
+            className="rounded-lg border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             Hoy
           </button>
@@ -158,7 +155,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
             {SHORT_DAY_NAMES.map((day) => (
               <div
                 key={day}
-                className="py-1 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400"
+                className="py-1 text-center text-xs font-medium uppercase text-muted-foreground"
               >
                 {day}
               </div>
@@ -195,11 +192,11 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
                 onClick={() => handleDayClick(day.date)}
                 onKeyDown={(e) => handleKeyDown(e, day.date)}
                 className={cn(
-                  "flex flex-col items-center rounded-lg p-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500",
+                  "flex flex-col items-center rounded-lg p-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   !day.isCurrentMonth && !today && "opacity-40",
                   today
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "hover:bg-gray-100 dark:hover:bg-gray-800",
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "hover:bg-muted",
                   currentView === "day" && "flex-row items-start gap-3 p-4"
                 )}
               >
@@ -207,7 +204,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
                 <span
                   className={cn(
                     "text-xs font-medium",
-                    today ? "text-white" : "text-gray-800 dark:text-gray-200",
+                    today ? "text-primary-foreground" : "text-foreground",
                     currentView === "day" && "text-lg"
                   )}
                 >
@@ -239,7 +236,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
                     {day.appointments.map((apt: AppointmentListItem) => (
                       <div
                         key={apt.id}
-                        className="rounded bg-gray-50 px-2 py-1 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                        className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground"
                       >
                         <span className="font-medium">{apt.time}</span> —{" "}
                         {apt.patient.name}
@@ -256,7 +253,7 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
       {/* Leyenda de colores */}
       <div className="flex flex-wrap gap-3 border-t px-4 py-3">
         {Object.entries(APPOINTMENT_DOT_COLORS).map(([type, color]) => (
-          <div key={type} className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+          <div key={type} className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className={cn("h-2 w-2 rounded-full", color)} />
             {APPOINTMENT_TYPE_LABELS[type as keyof typeof APPOINTMENT_TYPE_LABELS]}
           </div>

@@ -1,17 +1,14 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import type { ApiResponse, Appointment } from '@/types';
 import type { CreateAppointmentDTO, UpdateAppointmentDTO } from '@/lib/validations';
-
-// ─── Helpers ──────────────────────────────────────────────────
 
 async function extractError(res: Response): Promise<never> {
   const body = await res.json().catch(() => ({}));
   throw new Error(body.error || 'Error en la operación');
 }
-
-// ─── API Calls ────────────────────────────────────────────────
 
 async function createAppointment(
   data: CreateAppointmentDTO,
@@ -62,14 +59,6 @@ async function cancelAppointment(id: string): Promise<Appointment> {
   return json.data!;
 }
 
-// ─── Hook ─────────────────────────────────────────────────────
-
-/**
- * React Query mutations para operaciones CRUD + confirm/cancel de citas.
- *
- * Todas las mutaciones invalidan el queryKey `['appointments']` en onSuccess
- * para que las listas y el calendario se refresquen automáticamente.
- */
 export function useAppointmentMutations() {
   const queryClient = useQueryClient();
 
@@ -78,27 +67,47 @@ export function useAppointmentMutations() {
 
   const create = useMutation({
     mutationFn: createAppointment,
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success('Cita creada exitosamente');
+    },
+    onError: (err) => toast.error(`Error al crear cita: ${err.message}`),
   });
 
   const update = useMutation({
     mutationFn: updateAppointment,
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success('Cita actualizada exitosamente');
+    },
+    onError: (err) => toast.error(`Error al actualizar cita: ${err.message}`),
   });
 
   const remove = useMutation({
     mutationFn: deleteAppointment,
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success('Cita eliminada');
+    },
+    onError: (err) => toast.error(`Error al eliminar cita: ${err.message}`),
   });
 
   const confirm = useMutation({
     mutationFn: confirmAppointment,
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success('Cita confirmada');
+    },
+    onError: (err) => toast.error(`Error al confirmar cita: ${err.message}`),
   });
 
   const cancel = useMutation({
     mutationFn: cancelAppointment,
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success('Cita cancelada');
+    },
+    onError: (err) => toast.error(`Error al cancelar cita: ${err.message}`),
   });
 
   return {

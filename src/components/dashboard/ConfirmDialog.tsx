@@ -1,7 +1,7 @@
 "use client";
 
 import { Modal } from "@/components/ui/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 interface ConfirmDialogProps {
   /** Estado de apertura del diálogo. */
@@ -23,6 +23,12 @@ interface ConfirmDialogProps {
   /** Indica si la operación está en curso (deshabilita botones). */
   loading?: boolean;
 }
+
+// Map legacy variants to shadcn variants
+const variantMap: Record<"danger" | "primary", "destructive" | "default"> = {
+  danger: "destructive",
+  primary: "default",
+};
 
 /**
  * Diálogo de confirmación reutilizable.
@@ -52,10 +58,10 @@ export function ConfirmDialog({
         {cancelLabel}
       </Button>
       <Button
-        variant={variant}
+        variant={variantMap[variant]}
         size="sm"
         onClick={onConfirm}
-        loading={loading}
+        disabled={loading}
       >
         {confirmLabel}
       </Button>
@@ -70,7 +76,7 @@ export function ConfirmDialog({
       size="sm"
       footer={footer}
     >
-      <p className="text-sm text-gray-600">{message}</p>
+      <p className="text-sm text-muted-foreground">{message}</p>
     </Modal>
   );
 }

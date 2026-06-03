@@ -5,8 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Modal } from "@/components/ui/Modal";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { InputField } from "@/components/ui/input-field";
 import {
   CreateAppointmentDTO,
   type CreateAppointmentDTO as CreateDTO,
@@ -143,7 +143,7 @@ export function AppointmentModal({
       <Button variant="ghost" size="sm" onClick={onClose} disabled={isPending}>
         Cancelar
       </Button>
-      <Button variant="primary" size="sm" onClick={handleSubmit(onSubmit)} loading={isPending}>
+      <Button variant="default" size="sm" onClick={handleSubmit(onSubmit)} disabled={isPending}>
         {isEdit ? "Guardar cambios" : "Crear cita"}
       </Button>
     </>
@@ -163,22 +163,22 @@ export function AppointmentModal({
         <div>
           <label
             htmlFor="apt-patient-search"
-            className="mb-1 block text-sm font-medium text-gray-700"
+            className="mb-1.5 block text-sm font-medium text-foreground"
           >
             Paciente
           </label>
           <div className="relative">
-            <input
+            <InputField
               id="apt-patient-search"
               type="text"
               placeholder="Buscar paciente..."
               value={patientSearch}
               onChange={(e) => setPatientSearch(e.target.value)}
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
             />
             {patientsLoading && (
               <div className="absolute right-3 top-2.5">
-                <svg className="h-4 w-4 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 animate-spin text-muted-foreground" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
@@ -188,7 +188,7 @@ export function AppointmentModal({
 
           {/* Lista de pacientes filtrados */}
           {patientSearch && patients.length > 0 && (
-            <div className="mt-1 max-h-40 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+            <div className="mt-1 max-h-40 overflow-y-auto rounded-lg border bg-card shadow-sm">
               {patients.map((p) => (
                 <button
                   key={p.id}
@@ -198,8 +198,8 @@ export function AppointmentModal({
                     setPatientSearch(p.name);
                   }}
                   className={cn(
-                    "w-full px-3 py-2 text-left text-sm transition-colors hover:bg-gray-50",
-                    watch("patientId") === p.id && "bg-blue-50 text-blue-700"
+                    "w-full px-3 py-2 text-left text-sm transition-colors hover:bg-muted",
+                    watch("patientId") === p.id && "bg-accent text-accent-foreground"
                   )}
                 >
                   {p.name} — {p.phone}
@@ -209,12 +209,12 @@ export function AppointmentModal({
           )}
 
           {patientSearch && patients.length === 0 && !patientsLoading && (
-            <p className="mt-1 text-xs text-gray-400">No se encontraron pacientes</p>
+            <p className="mt-1 text-xs text-muted-foreground">No se encontraron pacientes</p>
           )}
 
-          <input type="hidden" {...register("patientId")} />
+          <InputField type="hidden" {...register("patientId")} />
           {errors.patientId && (
-            <p className="mt-1 text-xs text-red-600" role="alert">
+            <p className="mt-1 text-xs text-destructive" role="alert">
               {errors.patientId.message}
             </p>
           )}
@@ -222,7 +222,7 @@ export function AppointmentModal({
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Fecha */}
-          <Input
+          <InputField
             label="Fecha"
             type="date"
             {...register("date")}
@@ -233,7 +233,7 @@ export function AppointmentModal({
           <div>
             <label
               htmlFor="apt-time"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1.5 block text-sm font-medium text-foreground"
             >
               Hora
             </label>
@@ -242,8 +242,8 @@ export function AppointmentModal({
                 id="apt-time"
                 {...register("time")}
                 className={cn(
-                  "block w-full rounded-lg border px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500",
-                  errors.time ? "border-red-300" : "border-gray-300"
+                  "flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20",
+                  errors.time && "border-destructive focus-visible:ring-destructive/20"
                 )}
               >
                 <option value="">Seleccionar horario</option>
@@ -256,7 +256,7 @@ export function AppointmentModal({
                   ))}
               </select>
             ) : (
-              <Input
+              <InputField
                 id="apt-time"
                 type="time"
                 {...register("time")}
@@ -265,7 +265,7 @@ export function AppointmentModal({
               />
             )}
             {errors.time && (
-              <p className="mt-1 text-xs text-red-600" role="alert">
+              <p className="mt-1 text-xs text-destructive" role="alert">
                 {errors.time.message}
               </p>
             )}
@@ -276,7 +276,7 @@ export function AppointmentModal({
         <div>
           <label
             htmlFor="apt-type"
-            className="mb-1 block text-sm font-medium text-gray-700"
+            className="mb-1.5 block text-sm font-medium text-foreground"
           >
             Tipo de cita
           </label>
@@ -284,8 +284,8 @@ export function AppointmentModal({
             id="apt-type"
             {...register("type")}
             className={cn(
-              "block w-full rounded-lg border px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500",
-              errors.type ? "border-red-300" : "border-gray-300"
+              "flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20",
+              errors.type && "border-destructive focus-visible:ring-destructive/20"
             )}
           >
             {APPOINTMENT_TYPES.map((t) => (
@@ -295,7 +295,7 @@ export function AppointmentModal({
             ))}
           </select>
           {errors.type && (
-            <p className="mt-1 text-xs text-red-600" role="alert">
+            <p className="mt-1 text-xs text-destructive" role="alert">
               {errors.type.message}
             </p>
           )}
@@ -305,7 +305,7 @@ export function AppointmentModal({
         <div>
           <label
             htmlFor="apt-notes"
-            className="mb-1 block text-sm font-medium text-gray-700"
+            className="mb-1.5 block text-sm font-medium text-foreground"
           >
             Notas
           </label>
@@ -314,7 +314,7 @@ export function AppointmentModal({
             {...register("notes")}
             rows={3}
             placeholder="Notas adicionales (opcional)"
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
           />
         </div>
       </form>

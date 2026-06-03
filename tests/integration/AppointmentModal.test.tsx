@@ -58,6 +58,67 @@ jest.mock("@/lib/utils", () => ({
     classes.filter(Boolean).join(" "),
 }));
 
+jest.mock("@/components/ui/input-field", () => ({
+  InputField: React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement> & { label?: string; error?: string }>(
+    ({ label, error, id, ...props }, ref) => {
+      const inputId = id || `input-${Math.random().toString(36).slice(2, 8)}`;
+      return (
+        <div>
+          {label && <label htmlFor={inputId}>{label}</label>}
+          <input ref={ref} id={inputId} {...props} />
+          {error && <span>{error}</span>}
+        </div>
+      );
+    },
+  ),
+}));
+
+jest.mock("@/components/ui/Modal", () => ({
+  Modal: ({ open, onClose, title, children, footer }: Record<string, unknown>) => {
+    if (!open) return null;
+    return (
+      <div data-slot="modal">
+        <h2>{title as string}</h2>
+        <div>{children}</div>
+        {footer && <div>{footer}</div>}
+      </div>
+    );
+  },
+}));
+
+jest.mock("@/components/ui/button", () => ({
+  Button: React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string; size?: string }>(
+    ({ children, ...props }, ref) => (
+      <button ref={ref} {...props}>{children}</button>
+    ),
+  ),
+}));
+
+jest.mock("@/components/ui/select", () => ({
+  Select: ({ children, value, onValueChange }: Record<string, unknown>) => (
+    <select value={value as string} onChange={(e) => (onValueChange as (v: string) => void)?.(e.target.value)}>
+      {children}
+    </select>
+  ),
+  SelectTrigger: ({ children }: Record<string, unknown>) => <div>{children}</div>,
+  SelectValue: () => <span />,
+  SelectContent: ({ children }: Record<string, unknown>) => <div>{children}</div>,
+  SelectItem: ({ children, value }: Record<string, unknown>) => <option value={value as string}>{children as string}</option>,
+}));
+
+jest.mock("lucide-react", () => {
+  const Icon = () => <span data-lucide="mock" />;
+  return {
+    Search: Icon,
+    Calendar: Icon,
+    Clock: Icon,
+    User: Icon,
+    X: Icon,
+    Check: Icon,
+    Loader2: Icon,
+  };
+});
+
 // ─── Helpers ──────────────────────────────────────────────────
 
 function makePatient(overrides: Partial<Patient> = {}): Patient {

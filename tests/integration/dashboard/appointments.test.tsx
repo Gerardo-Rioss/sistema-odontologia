@@ -200,6 +200,70 @@ jest.mock("@/components/ui/Button", () => ({
   ),
 }));
 
+// Mock lowercase shadcn imports
+jest.mock("@/components/ui/button", () => ({
+  Button: ({
+    children,
+    onClick,
+    variant,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    variant?: string;
+    size?: string;
+    className?: string;
+  }) => (
+    <button onClick={onClick} data-testid={`btn-${variant ?? "default"}`}>
+      {children}
+    </button>
+  ),
+}));
+
+jest.mock("@/components/ui/tabs", () => ({
+  Tabs: ({ children, defaultValue, value, onValueChange }: {
+    children: React.ReactNode;
+    defaultValue?: string;
+    value?: string;
+    onValueChange?: (v: string) => void;
+  }) => <div data-testid="tabs">{children}</div>,
+  TabsList: ({ children, className }: {
+    children: React.ReactNode;
+    className?: string;
+  }) => <div data-testid="tabs-list" className={className}>{children}</div>,
+  TabsTrigger: ({ children, value, className }: {
+    children: React.ReactNode;
+    value: string;
+    className?: string;
+  }) => (
+    <button data-testid={`tabs-trigger-${value}`} className={className}>
+      {children}
+    </button>
+  ),
+  TabsContent: ({ children, value, className }: {
+    children: React.ReactNode;
+    value: string;
+    className?: string;
+  }) => <div data-testid={`tabs-content-${value}`} className={className}>{children}</div>,
+}));
+
+jest.mock("lucide-react", () => {
+  const Icon = () => <span data-lucide="mock" />;
+  return {
+    CalendarDays: Icon,
+    List: Icon,
+    Plus: Icon,
+    Search: Icon,
+    Filter: Icon,
+    Eye: Icon,
+    Edit: Icon,
+    Trash2: Icon,
+    Check: Icon,
+    X: Icon,
+    Clock: Icon,
+    Calendar: Icon,
+  };
+});
+
 jest.mock("@/lib/utils", () => ({
   cn: (...classes: (string | undefined | false | null)[]) =>
     classes.filter(Boolean).join(" "),
@@ -340,8 +404,8 @@ describe("Appointments Page — slot ocupado y edición", () => {
     fireEvent.click(screen.getByText("Lista"));
     expect(screen.getByTestId("appointment-list")).toBeDefined();
 
-    // Switch back to calendar
-    fireEvent.click(screen.getByText("Calendario"));
+    // Switch back to calendar (use tabs trigger to avoid ambiguity with calendar-view text)
+    fireEvent.click(screen.getByTestId("tabs-trigger-calendar"));
     expect(screen.getByTestId("calendar-view")).toBeDefined();
   });
 

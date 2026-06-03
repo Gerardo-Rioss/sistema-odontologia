@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Modal } from "@/components/ui/Modal";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { InputField } from "@/components/ui/input-field";
 import {
   CreatePatientDTO,
   type CreatePatientDTO as CreateDTO,
@@ -102,7 +102,7 @@ export function PatientForm({ open, onClose, patient }: PatientFormProps) {
       <Button variant="ghost" size="sm" onClick={onClose} disabled={isPending}>
         Cancelar
       </Button>
-      <Button variant="primary" size="sm" onClick={handleSubmit(onSubmit)} loading={isPending}>
+      <Button variant="default" size="sm" onClick={handleSubmit(onSubmit)} disabled={isPending}>
         {isEdit ? "Guardar cambios" : "Crear paciente"}
       </Button>
     </>
@@ -118,7 +118,7 @@ export function PatientForm({ open, onClose, patient }: PatientFormProps) {
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {/* Nombre */}
-        <Input
+        <InputField
           label="Nombre completo"
           placeholder="Nombre del paciente"
           {...register("name")}
@@ -128,7 +128,7 @@ export function PatientForm({ open, onClose, patient }: PatientFormProps) {
         />
 
         {/* Teléfono */}
-        <Input
+        <InputField
           label="Teléfono"
           type="tel"
           placeholder="+56 9 1234 5678"
@@ -139,7 +139,7 @@ export function PatientForm({ open, onClose, patient }: PatientFormProps) {
         />
 
         {/* Email */}
-        <Input
+        <InputField
           label="Email"
           type="email"
           placeholder="paciente@email.com"
@@ -152,7 +152,7 @@ export function PatientForm({ open, onClose, patient }: PatientFormProps) {
         <div>
           <label
             htmlFor="patient-notes"
-            className="mb-1 block text-sm font-medium text-gray-700"
+            className="mb-1.5 block text-sm font-medium text-foreground"
           >
             Notas
           </label>
@@ -163,13 +163,12 @@ export function PatientForm({ open, onClose, patient }: PatientFormProps) {
             placeholder="Notas adicionales (opcional)"
             disabled={isPending}
             className={cn(
-              "block w-full rounded-lg border px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500",
-              errors.notes ? "border-red-300" : "border-gray-300",
-              isPending && "bg-gray-50 text-gray-500"
+              "flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50",
+              errors.notes && "border-destructive focus-visible:ring-destructive/20"
             )}
           />
           {errors.notes && (
-            <p className="mt-1 text-xs text-red-600" role="alert">
+            <p className="mt-1 text-xs text-destructive" role="alert">
               {errors.notes.message}
             </p>
           )}

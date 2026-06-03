@@ -1,5 +1,6 @@
 "use client";
 
+import { CalendarDays } from "lucide-react";
 import { Table } from "@/components/ui/Table";
 import { StatusBadge, TypeBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -34,8 +35,8 @@ export function AppointmentList({
 }: AppointmentListProps) {
   if (error) {
     return (
-      <div className="rounded-xl bg-red-50 p-6 text-center shadow-sm" role="alert">
-        <p className="text-sm text-red-600">{error}</p>
+      <div className="rounded-xl border border-destructive/50 bg-destructive/10 p-6 text-center shadow-sm" role="alert">
+        <p className="text-sm text-destructive">{error}</p>
       </div>
     );
   }
@@ -75,11 +76,7 @@ export function AppointmentList({
 
   const emptyState = (
     <EmptyState
-      icon={
-        <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      }
+      icon={<CalendarDays className="h-12 w-12" />}
       message="No hay citas para mostrar"
     />
   );

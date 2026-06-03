@@ -4,7 +4,7 @@ import Link from "next/link";
 import { formatDate, formatTime } from "@/lib/formatters";
 import { StatusBadge, TypeBadge } from "@/components/ui/StatusBadge";
 import { Modal } from "@/components/ui/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import { useAppointmentMutations } from "@/hooks/useAppointmentMutations";
 import { useAppointments } from "@/hooks/useAppointments";
@@ -86,8 +86,8 @@ export function AppointmentDetail({
   if (error) {
     return (
       <Modal open={open} onClose={onClose} title="Detalle de cita" size="md">
-        <div className="rounded-lg bg-red-50 p-4 text-center" role="alert">
-          <p className="text-sm text-red-600">{error.message}</p>
+        <div className="rounded-lg bg-destructive/10 p-4 text-center" role="alert">
+          <p className="text-sm text-destructive">{error.message}</p>
         </div>
       </Modal>
     );
@@ -97,7 +97,7 @@ export function AppointmentDetail({
     return (
       <Modal open={open} onClose={onClose} title="Detalle de cita" size="md">
         <div className="py-8 text-center">
-          <p className="text-sm text-gray-500">Cita no encontrada</p>
+          <p className="text-sm text-muted-foreground">Cita no encontrada</p>
         </div>
       </Modal>
     );
@@ -112,20 +112,20 @@ export function AppointmentDetail({
     <div className="flex flex-wrap gap-2">
       {canConfirm && (
         <Button
-          variant="primary"
+          variant="default"
           size="sm"
           onClick={handleConfirm}
-          loading={isConfirming}
+          disabled={isConfirming}
         >
           Confirmar
         </Button>
       )}
       {canCancel && (
         <Button
-          variant="danger"
+          variant="destructive"
           size="sm"
           onClick={handleCancel}
-          loading={isCancelling}
+          disabled={isCancelling}
         >
           Cancelar cita
         </Button>
@@ -159,21 +159,21 @@ export function AppointmentDetail({
         {/* Fecha y hora */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-xs font-medium uppercase text-gray-500">Fecha</p>
-            <p className="text-sm text-gray-900">{formatDate(appointment.date)}</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Fecha</p>
+            <p className="text-sm text-foreground">{formatDate(appointment.date)}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase text-gray-500">Hora</p>
-            <p className="text-sm text-gray-900">{formatTime(appointment.time)}</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Hora</p>
+            <p className="text-sm text-foreground">{formatTime(appointment.time)}</p>
           </div>
         </div>
 
         {/* Paciente */}
         <div>
-          <p className="text-xs font-medium uppercase text-gray-500">Paciente</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Paciente</p>
           <Link
             href={`/dashboard/patients`}
-            className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+            className="text-sm font-medium text-primary hover:underline"
           >
             {appointment.patient.name}
           </Link>
@@ -182,8 +182,8 @@ export function AppointmentDetail({
         {/* Notas */}
         {appointment.notes && (
           <div>
-            <p className="text-xs font-medium uppercase text-gray-500">Notas</p>
-            <p className="whitespace-pre-wrap text-sm text-gray-700">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Notas</p>
+            <p className="whitespace-pre-wrap text-sm text-foreground">
               {appointment.notes}
             </p>
           </div>

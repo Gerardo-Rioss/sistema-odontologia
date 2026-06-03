@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { Plus, Loader2 } from "lucide-react";
 
 interface CalendarStatus {
   connected: boolean;
@@ -97,13 +98,13 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Configuración</h1>
+      <h1 className="text-2xl font-bold text-foreground">Configuración</h1>
 
       {/* ── Connected Banner ─────────────────────────────────── */}
       {showConnectedBanner && (
-        <div className="rounded-xl bg-green-50 border border-green-200 p-4 dark:bg-green-950 dark:border-green-800">
+        <div className="rounded-xl border border-green-200 bg-green-50/50 p-4 dark:border-green-800 dark:bg-green-950/50">
           <div className="flex items-center gap-2">
-            <span className="text-green-600 text-lg dark:text-green-400">✓</span>
+            <span className="text-base font-medium text-green-700 dark:text-green-400">✓</span>
             <p className="text-sm font-medium text-green-800 dark:text-green-300">
               Google Calendar conectado exitosamente
             </p>
@@ -112,38 +113,38 @@ export default function SettingsPage() {
       )}
 
       {/* ── Google Calendar Section ──────────────────────────── */}
-      <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-900">
-        <h2 className="text-lg font-semibold text-gray-900">
+      <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">
           Google Calendar
         </h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Sincronizá tus citas con Google Calendar automáticamente.
         </p>
 
         <div className="mt-4">
           {loading ? (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
               Cargando estado...
             </div>
           ) : calendarStatus.connected ? (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                  <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500" />
                 </span>
-                <span className="text-sm font-medium text-green-700">
+                <span className="text-sm font-medium text-green-700 dark:text-green-400">
                   Conectado
                 </span>
                 {calendarStatus.email && (
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-muted-foreground">
                     — {calendarStatus.email}
                   </span>
                 )}
               </div>
 
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Última sincronización:{" "}
                 {formatLastSync(calendarStatus.lastSyncedAt)}
               </p>
@@ -151,11 +152,11 @@ export default function SettingsPage() {
               <button
                 onClick={handleDisconnect}
                 disabled={disconnecting}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-destructive/30 px-4 py-2 text-sm font-medium text-destructive transition hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {disconnecting ? (
                   <>
-                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-red-300 border-t-red-600 dark:border-red-700 dark:border-t-red-400" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     Desconectando...
                   </>
                 ) : (
@@ -166,28 +167,21 @@ export default function SettingsPage() {
           ) : (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-gray-300 dark:bg-gray-600" />
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <span className="inline-flex h-3 w-3 rounded-full bg-muted-foreground/30" />
+                <span className="text-sm font-medium text-muted-foreground">
                   No conectado
                 </span>
               </div>
 
               <a
                 href="/api/calendar/auth"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
               >
-                <svg
-                  className="h-4 w-4"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path d="M12 0C5.372 0 0 5.373 0 12s5.372 12 12 12c6.627 0 12-5.373 12-12S18.627 0 12 0zm6.225 12.525h-5.7v5.7h-1.05v-5.7h-5.7v-1.05h5.7v-5.7h1.05v5.7h5.7v1.05z" />
-                </svg>
+                <Plus className="h-4 w-4" />
                 Conectar Google Calendar
               </a>
 
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Al conectar, se sincronizarán automáticamente tus citas
                 con Google Calendar.
               </p>
@@ -197,27 +191,27 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Clinic Data Section ──────────────────────────────── */}
-      <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-900">
-        <h2 className="text-lg font-semibold text-gray-900">
+      <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">
           Datos del Consultorio
         </h2>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-muted-foreground">
           Nombre, dirección, teléfono y horarios de atención.
         </p>
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4 text-sm text-muted-foreground">
           La configuración estará disponible próximamente.
         </p>
       </div>
 
       {/* ── Notification Preferences ──────────────────────────── */}
-      <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-900">
-        <h2 className="text-lg font-semibold text-gray-900">
+      <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">
           Preferencias de Notificación
         </h2>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-muted-foreground">
           Configurá cómo y cuándo querés recibir notificaciones.
         </p>
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4 text-sm text-muted-foreground">
           Las notificaciones se habilitarán en una fase futura.
         </p>
       </div>

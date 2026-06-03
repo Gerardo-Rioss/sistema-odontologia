@@ -57,7 +57,6 @@ export function Table<T extends { id: string }>({
     return [...data].sort((a, b) => {
       const aVal = col.render(a);
       const bVal = col.render(b);
-      // Comparar como strings para tipos primitivos — los render pueden devolver ReactNode
       const aStr = typeof aVal === "string" ? aVal : "";
       const bStr = typeof bVal === "string" ? bVal : "";
       const cmp = aStr.localeCompare(bStr, "es");
@@ -68,16 +67,14 @@ export function Table<T extends { id: string }>({
   // Estado de carga: filas esqueleto
   if (isLoading) {
     return (
-      <div
-        className={cn("overflow-x-auto rounded-xl bg-white shadow-sm dark:bg-gray-900", className)}
-      >
+      <div className={cn("overflow-hidden rounded-xl border bg-card", className)}>
         <table className="w-full" role="table">
           <thead>
-            <tr className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800">
+            <tr className="border-b bg-muted/50">
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
                 >
                   {col.header}
                 </th>
@@ -86,10 +83,10 @@ export function Table<T extends { id: string }>({
           </thead>
           <tbody>
             {Array.from({ length: skeletonRows }).map((_, i) => (
-              <tr key={i} className="border-b">
+              <tr key={i} className="border-b border-border">
                 {columns.map((col) => (
                   <td key={col.key} className="px-6 py-4">
-                    <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
                   </td>
                 ))}
               </tr>
@@ -103,25 +100,23 @@ export function Table<T extends { id: string }>({
   // Estado vacío
   if (data.length === 0 && emptyState) {
     return (
-      <div className={cn("rounded-xl bg-white shadow-sm dark:bg-gray-900", className)}>
+      <div className={cn("overflow-hidden rounded-xl border bg-card", className)}>
         {emptyState}
       </div>
     );
   }
 
   return (
-    <div
-      className={cn("overflow-x-auto rounded-xl bg-white shadow-sm dark:bg-gray-900", className)}
-    >
+    <div className={cn("overflow-hidden rounded-xl border bg-card", className)}>
       <table className="w-full" role="table">
         <thead>
-          <tr className="border-b bg-gray-50">
+          <tr className="border-b bg-muted/50">
             {columns.map((col) => (
               <th
                 key={col.key}
                 className={cn(
-                  "px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400",
-                  col.sortable && "cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200",
+                  "px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground",
+                  col.sortable && "cursor-pointer select-none hover:text-foreground transition-colors",
                   col.className
                 )}
                 aria-sort={
@@ -150,7 +145,7 @@ export function Table<T extends { id: string }>({
             <tr
               key={row.id}
               className={cn(
-                "border-b border-gray-200 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800",
+                "border-b border-border transition-colors hover:bg-muted/50",
                 onRowClick && "cursor-pointer"
               )}
               onClick={() => onRowClick?.(row)}
@@ -158,7 +153,7 @@ export function Table<T extends { id: string }>({
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className={cn("px-6 py-4 text-sm text-gray-900 dark:text-gray-100", col.className)}
+                  className={cn("px-6 py-4 text-sm text-foreground", col.className)}
                 >
                   {col.render(row)}
                 </td>

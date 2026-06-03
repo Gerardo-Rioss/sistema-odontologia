@@ -22,8 +22,8 @@ import { axe, toHaveNoViolations } from "jest-axe";
 expect.extend(toHaveNoViolations);
 
 import { Modal } from "@/components/ui/Modal";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { InputField } from "@/components/ui/input-field";
 import { Table, type TableColumn } from "@/components/ui/Table";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -36,6 +36,38 @@ jest.mock("@/lib/utils", () => ({
   cn: (...classes: (string | undefined | false | null)[]) =>
     classes.filter(Boolean).join(" "),
 }));
+
+jest.mock("@/components/ui/card", () => ({
+  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
+}));
+
+jest.mock("@/components/ui/skeleton", () => ({
+  Skeleton: ({ className }: { className?: string }) => (
+    <div className={className} data-testid="skeleton" />
+  ),
+}));
+
+jest.mock("@/components/ui/alert", () => ({
+  Alert: ({ children, className, variant }: { children: React.ReactNode; className?: string; variant?: string }) => (
+    <div className={className} data-alert={variant || "default"} role={variant === "destructive" ? "alert" : undefined}>{children}</div>
+  ),
+  AlertDescription: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
+}));
+
+jest.mock("lucide-react", () => {
+  const Icon = ({ "aria-hidden": ariaHidden, className }: { "aria-hidden"?: boolean; className?: string }) => (
+    <span aria-hidden={ariaHidden} className={className} />
+  );
+  return {
+    AlertCircle: Icon,
+    TrendingUp: Icon,
+    TrendingDown: Icon,
+  };
+});
 
 // ─── Helper: ejecutar axe y verificar ─────────────────────────
 
@@ -209,7 +241,7 @@ describe("A11y — Table (jest-axe)", () => {
 describe("A11y — Input (jest-axe)", () => {
   it("no debe tener violaciones WCAG con label", async () => {
     const { container } = render(
-      <Input label="Correo Electrónico" type="email" />,
+      <InputField label="Correo Electrónico" type="email" />,
     );
 
     await expectNoViolations(container);
@@ -217,7 +249,7 @@ describe("A11y — Input (jest-axe)", () => {
 
   it("no debe tener violaciones WCAG con error", async () => {
     const { container } = render(
-      <Input
+      <InputField
         label="Nombre"
         error="El nombre es obligatorio"
         value=""
@@ -229,7 +261,7 @@ describe("A11y — Input (jest-axe)", () => {
   });
 
   it("debe vincular label con input vía htmlFor", () => {
-    render(<Input label="Correo Electrónico" id="test-email" />);
+    render(<InputField label="Correo Electrónico" id="test-email" />);
 
     const label = document.querySelector("label");
     const input = document.querySelector("input");
@@ -240,7 +272,7 @@ describe("A11y — Input (jest-axe)", () => {
 
   it("debe mostrar aria-invalid='true' cuando hay error", () => {
     render(
-      <Input
+      <InputField
         label="Nombre"
         error="Requerido"
         value=""
@@ -254,7 +286,7 @@ describe("A11y — Input (jest-axe)", () => {
 
   it("debe vincular aria-describedby al mensaje de error", () => {
     render(
-      <Input label="Nombre" id="name-input" error="Campo requerido" />,
+      <InputField label="Nombre" id="name-input" error="Campo requerido" />,
     );
 
     const input = document.querySelector("input");
@@ -267,7 +299,7 @@ describe("A11y — Input (jest-axe)", () => {
   });
 
   it("no debe tener aria-invalid cuando no hay error", () => {
-    render(<Input label="Nombre" />);
+    render(<InputField label="Nombre" />);
 
     const input = document.querySelector("input");
     expect(input?.getAttribute("aria-invalid")).toBeNull();
@@ -275,7 +307,7 @@ describe("A11y — Input (jest-axe)", () => {
 
   it("error debe tener role='alert'", () => {
     render(
-      <Input label="Nombre" error="Campo requerido" />,
+      <InputField label="Nombre" error="Campo requerido" />,
     );
 
     const alert = document.querySelector('[role="alert"]');
@@ -289,7 +321,7 @@ describe("A11y — Input (jest-axe)", () => {
 describe("A11y — Button (jest-axe)", () => {
   it("no debe tener violaciones WCAG", async () => {
     const { container } = render(
-      <Button variant="primary">Enviar</Button>,
+      <Button variant="default">Enviar</Button>,
     );
 
     await expectNoViolations(container);
@@ -297,7 +329,7 @@ describe("A11y — Button (jest-axe)", () => {
 
   it("no debe tener violaciones en estado disabled", async () => {
     const { container } = render(
-      <Button variant="primary" disabled>
+      <Button variant="default" disabled>
         Deshabilitado
       </Button>,
     );
@@ -307,7 +339,7 @@ describe("A11y — Button (jest-axe)", () => {
 
   it("no debe tener violaciones en estado loading", async () => {
     const { container } = render(
-      <Button variant="primary" loading={true}>
+      <Button variant="default" disabled={true}>
         Guardando
       </Button>,
     );

@@ -23,10 +23,32 @@ import { Spinner } from "@/components/ui/Spinner";
 
 // ─── Mocks ────────────────────────────────────────────────────
 
-// Spinner usa cn() de @/lib/utils — mockeamos el módulo si es necesario
 jest.mock("@/lib/utils", () => ({
   cn: (...classes: (string | undefined | false | null)[]) =>
     classes.filter(Boolean).join(" "),
+}));
+
+jest.mock("@/components/ui/card", () => ({
+  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
+}));
+
+jest.mock("@/components/ui/skeleton", () => ({
+  Skeleton: ({ className }: { className?: string }) => (
+    <div className={className} data-slot="skeleton" />
+  ),
+}));
+
+jest.mock("@/components/ui/alert", () => ({
+  Alert: ({ children, className, variant }: { children: React.ReactNode; className?: string; variant?: string }) => (
+    <div className={className} data-variant={variant} role="alert">{children}</div>
+  ),
+  AlertDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+jest.mock("lucide-react", () => ({
+  AlertCircle: () => <span data-lucide="alert-circle" />,
 }));
 
 // ─── StatsCard ────────────────────────────────────────────────
@@ -90,8 +112,8 @@ describe("StatsCard", () => {
     expect(screen.getByText("8%")).toBeDefined();
   });
 
-  it("debe mostrar estado de carga con Spinner", () => {
-    render(
+  it("debe mostrar estado de carga con Skeleton", () => {
+    const { container } = render(
       <StatsCard
         icon={iconFixture}
         label="Cargando..."
@@ -101,9 +123,9 @@ describe("StatsCard", () => {
       />,
     );
 
-    // El Spinner tiene role="status"
-    const spinner = screen.getByRole("status");
-    expect(spinner).toBeDefined();
+    // El Skeleton reemplaza al Spinner en loading
+    const skeleton = container.querySelector('[data-slot="skeleton"]');
+    expect(skeleton).toBeDefined();
     // No debe mostrar el valor numérico
     expect(screen.queryByText("0")).toBeNull();
   });

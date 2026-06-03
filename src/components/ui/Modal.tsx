@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 
 interface ModalProps {
   open: boolean;
@@ -103,7 +104,7 @@ export function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/50 transition-opacity"
+        className="fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -115,34 +116,22 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          "relative z-10 w-full rounded-xl bg-white shadow-xl dark:bg-gray-900",
+          "relative z-10 w-full rounded-xl border bg-card shadow-xl",
           sizeClasses[size],
           className
         )}
       >
         {/* Cabecera */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-800">
-          <h2 id={titleId} className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <div className="flex items-center justify-between border-b px-6 py-4">
+          <h2 id={titleId} className="text-lg font-semibold text-foreground">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+            className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label="Cerrar"
           >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -151,7 +140,7 @@ export function Modal({
 
         {/* Footer opcional (botones de acción) */}
         {footer && (
-          <div className="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-800">
+          <div className="flex justify-end gap-3 border-t px-6 py-4">
             {footer}
           </div>
         )}

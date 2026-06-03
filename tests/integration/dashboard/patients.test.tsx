@@ -115,6 +115,47 @@ jest.mock("@/components/ui/Button", () => ({
   ),
 }));
 
+// Mock lowercase shadcn imports
+jest.mock("@/components/ui/button", () => ({
+  Button: ({
+    children,
+    onClick,
+    variant,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    variant?: string;
+    size?: string;
+    className?: string;
+  }) => (
+    <button onClick={onClick} data-testid={`btn-${variant ?? "default"}`}>
+      {children}
+    </button>
+  ),
+}));
+
+jest.mock("@/components/ui/input", () => ({
+  Input: React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
+    (props, ref) => <input ref={ref} {...props} />,
+  ),
+}));
+
+jest.mock("lucide-react", () => {
+  const Icon = () => <span data-lucide="mock" />;
+  return {
+    Search: Icon,
+    X: Icon,
+    UserPlus: Icon,
+    Plus: Icon,
+    Edit: Icon,
+    Trash2: Icon,
+    Eye: Icon,
+    Phone: Icon,
+    Mail: Icon,
+    MapPin: Icon,
+  };
+});
+
 jest.mock("@/components/ui/Table", () => ({
   Table: ({
     columns,

@@ -7,10 +7,12 @@ import { usePatientMutations } from "@/hooks/usePatientMutations";
 import { useAppointments } from "@/hooks/useAppointments";
 import { PatientForm } from "@/components/dashboard/PatientForm";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Table } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Spinner } from "@/components/ui/Spinner";
+import { Input } from "@/components/ui/input";
+import { Search, X, UserPlus, Pencil, Trash2, UserRound } from "lucide-react";
 import { formatShortDate, formatTime, formatPhoneNumber } from "@/lib/formatters";
 import type { Patient } from "@/types";
 import { cn } from "@/lib/utils";
@@ -123,7 +125,7 @@ export default function PatientsPage() {
       header: "Nombre",
       sortable: true,
       render: (row: Patient) => (
-        <span className="font-medium text-gray-900">{row.name}</span>
+        <span className="font-medium text-foreground">{row.name}</span>
       ),
     },
     {
@@ -131,7 +133,7 @@ export default function PatientsPage() {
       header: "Teléfono",
       sortable: true,
       render: (row: Patient) => (
-        <span className="text-gray-500">{formatPhoneNumber(row.phone)}</span>
+        <span className="text-muted-foreground">{formatPhoneNumber(row.phone)}</span>
       ),
     },
     {
@@ -139,7 +141,7 @@ export default function PatientsPage() {
       header: "Email",
       sortable: true,
       render: (row: Patient) => (
-        <span className="text-gray-500">{row.email ?? "—"}</span>
+        <span className="text-muted-foreground">{row.email ?? "—"}</span>
       ),
     },
     {
@@ -147,7 +149,7 @@ export default function PatientsPage() {
       header: "Citas",
       sortable: true,
       render: (row: Patient) => (
-        <span className="text-gray-500">
+        <span className="text-muted-foreground">
           {row._count?.appointments ?? allAppointments.filter((a) => a.patientId === row.id).length}
         </span>
       ),
@@ -164,24 +166,20 @@ export default function PatientsPage() {
               e.stopPropagation();
               handleEditPatient(row);
             }}
-            className="rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600"
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             aria-label={`Editar ${row.name}`}
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+            <Pencil className="h-4 w-4" />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleDeleteRequest(row);
             }}
-            className="rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600"
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
             aria-label={`Eliminar ${row.name}`}
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
       ),
@@ -192,11 +190,7 @@ export default function PatientsPage() {
 
   const emptyState = (
     <EmptyState
-      icon={
-        <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      }
+      icon={<UserRound className="h-12 w-12" />}
       message="No hay pacientes registrados"
       action={
         searchQuery ? (
@@ -204,7 +198,7 @@ export default function PatientsPage() {
             Limpiar búsqueda
           </Button>
         ) : (
-          <Button variant="primary" size="sm" onClick={handleNewPatient}>
+          <Button variant="default" size="sm" onClick={handleNewPatient}>
             Agregar primer paciente
           </Button>
         )
@@ -221,46 +215,34 @@ export default function PatientsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Cabecera: título + botón nuevo paciente */}
+      {/* Cabecera */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Pacientes</h1>
-        <Button variant="primary" size="md" onClick={handleNewPatient}>
-          <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
+        <h1 className="text-2xl font-bold">Pacientes</h1>
+        <Button onClick={handleNewPatient}>
+          <UserPlus className="mr-2 h-4 w-4" />
           Nuevo paciente
         </Button>
       </div>
 
       {/* Barra de búsqueda */}
-      <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900">
+      <div className="rounded-xl border bg-card p-4 shadow-sm">
         <div className="relative">
-          <svg
-            className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
             type="text"
             placeholder="Buscar paciente por nombre..."
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 py-2.5 pl-11 pr-10 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:text-gray-100 dark:placeholder:text-gray-500"
+            className="pl-10 pr-10"
             aria-label="Buscar paciente"
           />
           {localSearch && (
             <button
               onClick={handleClearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               aria-label="Limpiar búsqueda"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -268,9 +250,9 @@ export default function PatientsPage() {
 
       {/* Estado de error */}
       {patientsError && (
-        <div className="rounded-xl bg-red-50 p-6 text-center shadow-sm dark:bg-red-950" role="alert">
-          <p className="text-sm font-medium text-red-800 dark:text-red-300">Error al cargar pacientes</p>
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{patientsError.message}</p>
+        <div className="rounded-xl border border-destructive/50 bg-destructive/10 p-6 text-center shadow-sm" role="alert">
+          <p className="text-sm font-medium text-destructive">Error al cargar pacientes</p>
+          <p className="mt-1 text-sm text-destructive">{patientsError.message}</p>
           <Button variant="ghost" size="sm" className="mt-3" onClick={() => refetchPatients()}>
             Reintentar
           </Button>
@@ -286,7 +268,7 @@ export default function PatientsPage() {
 
       {/* Tabla de pacientes */}
       {!patientsLoading && !patientsError && (
-        <div className="rounded-xl bg-white shadow-sm dark:bg-gray-900">
+        <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
           <Table
             columns={columns}
             data={patients}
@@ -297,21 +279,21 @@ export default function PatientsPage() {
 
           {/* Expansión inline: últimas citas del paciente */}
           {expandedId && expandedAppointments.length > 0 && (
-            <div className="border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800">
-              <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <div className="border-t bg-muted/30 p-4">
+              <h3 className="mb-3 text-sm font-semibold text-foreground">
                 Últimas citas
               </h3>
               <div className="space-y-2">
                 {expandedAppointments.slice(0, 5).map((apt) => (
                   <div
                     key={apt.id}
-                    className="flex items-center justify-between rounded-lg bg-white px-4 py-2.5 shadow-sm dark:bg-gray-900"
+                    className="flex items-center justify-between rounded-lg bg-card px-4 py-2.5 shadow-sm"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-foreground">
                         {formatShortDate(apt.date)}
                       </span>
-                      <span className="text-sm text-gray-500">{formatTime(apt.time)}</span>
+                      <span className="text-sm text-muted-foreground">{formatTime(apt.time)}</span>
                       <span
                         className={cn(
                           "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
@@ -334,8 +316,8 @@ export default function PatientsPage() {
           )}
 
           {expandedId && expandedAppointments.length === 0 && (
-            <div className="border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800">
-              <p className="text-sm text-gray-500">No hay citas registradas para este paciente.</p>
+            <div className="border-t bg-muted/30 p-4">
+              <p className="text-sm text-muted-foreground">No hay citas registradas para este paciente.</p>
             </div>
           )}
         </div>

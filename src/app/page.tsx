@@ -17,12 +17,12 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-8 dark:bg-gray-950">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background p-8">
       <div className="max-w-md text-center">
-        <h1 className="text-4xl font-bold text-gray-900">
+        <h1 className="text-4xl font-bold text-foreground">
           Sistema de Gestión Odontológica
         </h1>
-        <p className="mt-4 text-lg text-gray-600">
+        <p className="mt-4 text-lg text-muted-foreground">
           Automatizá tus citas, gestioná pacientes y sincronizá tu calendario
           desde un solo lugar.
         </p>
@@ -30,34 +30,34 @@ export default function Home() {
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Link
             href="/login"
-            className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white shadow transition hover:bg-blue-700"
+            className="rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground shadow transition hover:bg-primary/90"
           >
             Iniciar Sesión
           </Link>
           <Link
             href="/register"
-            className="rounded-lg border border-blue-600 px-6 py-3 font-medium text-blue-600 transition hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950"
+            className="rounded-lg border border-primary px-6 py-3 font-medium text-primary transition hover:bg-primary/10"
           >
             Registrarse
           </Link>
         </div>
 
         <div className="mt-12 grid grid-cols-1 gap-4 text-left sm:grid-cols-3">
-          <div className="rounded-lg border bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
-            <h3 className="font-semibold">📅 Citas</h3>
-            <p className="mt-1 text-sm text-gray-500">
+          <div className="rounded-lg border bg-card p-4">
+            <h3 className="font-semibold text-foreground">📅 Citas</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
               Agendá, modificá y cancelá turnos con un clic.
             </p>
           </div>
-          <div className="rounded-lg border bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
-            <h3 className="font-semibold">👥 Pacientes</h3>
-            <p className="mt-1 text-sm text-gray-500">
+          <div className="rounded-lg border bg-card p-4">
+            <h3 className="font-semibold text-foreground">👥 Pacientes</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
               Historial completo y datos de contacto centralizados.
             </p>
           </div>
-          <div className="rounded-lg border bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
-            <h3 className="font-semibold">📊 Estadísticas</h3>
-            <p className="mt-1 text-sm text-gray-500">
+          <div className="rounded-lg border bg-card p-4">
+            <h3 className="font-semibold text-foreground">📊 Estadísticas</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
               Ingresos, tasa de cancelación y tendencias en gráficos.
             </p>
           </div>

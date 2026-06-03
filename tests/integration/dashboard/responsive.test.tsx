@@ -74,7 +74,7 @@ jest.mock("@/components/ui/Spinner", () => ({
   ),
 }));
 
-jest.mock("@/components/ui/Button", () => ({
+jest.mock("@/components/ui/button", () => ({
   Button: ({
     children,
     variant,
@@ -87,26 +87,52 @@ jest.mock("@/components/ui/Button", () => ({
     className?: string;
     onClick?: () => void;
   }) => (
-    <button data-testid={`btn-${variant ?? "primary"}`} className={className}>
+    <button data-testid={`btn-${variant ?? "default"}`} className={className}>
       {children}
     </button>
   ),
 }));
 
-jest.mock("@/components/ui/Card", () => ({
+jest.mock("@/components/ui/card", () => ({
   Card: ({
-    header,
     children,
+    className,
   }: {
-    header?: React.ReactNode;
     children: React.ReactNode;
+    className?: string;
   }) => (
-    <div data-testid="card">
-      {header}
+    <div data-testid="card" className={className}>
       {children}
     </div>
   ),
+  CardHeader: ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }) => <div className={className}>{children}</div>,
+  CardContent: ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }) => <div className={className}>{children}</div>,
 }));
+
+jest.mock("lucide-react", () => {
+  const Icon = () => <span data-lucide="mock" />;
+  return {
+    CalendarDays: Icon,
+    Users: Icon,
+    DollarSign: Icon,
+    AlertTriangle: Icon,
+    Plus: Icon,
+    UserPlus: Icon,
+    BarChart3: Icon,
+  };
+});
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -150,7 +176,6 @@ beforeEach(() => {
 
 describe("Dashboard — vista móvil", () => {
   it("debe renderizar los StatsCards en una columna en móvil (grid-cols-1)", () => {
-    // Mock window.innerWidth for mobile
     Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
@@ -207,7 +232,6 @@ describe("Dashboard — vista escritorio", () => {
 
     render(<DashboardPage />);
 
-    // Should have the appointment list card and the quick actions card
     const cards = screen.getAllByTestId("card");
     expect(cards.length).toBeGreaterThanOrEqual(1);
   });

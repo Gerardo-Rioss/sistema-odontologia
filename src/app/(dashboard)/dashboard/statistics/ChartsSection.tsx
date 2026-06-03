@@ -36,8 +36,8 @@ function CustomTooltip({
 }) {
   if (!active || !payload) return null;
   return (
-    <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg">
-      <p className="text-xs font-medium text-gray-500">{label}</p>
+    <div className="rounded-lg border bg-card px-3 py-2 text-sm shadow-lg">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} className="text-sm font-semibold" style={{ color: entry.color }}>
           {entry.name}: {entry.value}
@@ -71,8 +71,8 @@ export function ChartsSection({
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
       {/* Gráfico de barras: Citas por mes */}
-      <div className="rounded-xl bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+      <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">
           Citas por mes
         </h2>
         <ResponsiveContainer width="100%" height={300}>
@@ -106,8 +106,8 @@ export function ChartsSection({
       </div>
 
       {/* Gráfico de torta: Distribución por tipo */}
-      <div className="rounded-xl bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+      <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">
           Tipos de cita
         </h2>
         {byType.length > 0 ? (
@@ -142,15 +142,15 @@ export function ChartsSection({
             </PieChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex h-[300px] items-center justify-center text-sm text-gray-400">
+          <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
             Sin datos de tipos de cita
           </div>
         )}
       </div>
 
       {/* Gráfico de líneas: Tendencia de completadas */}
-      <div className="rounded-xl bg-white p-6 shadow-sm xl:col-span-2">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+      <div className="rounded-xl border bg-card p-6 shadow-sm xl:col-span-2">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">
           Tendencia de tasa de completadas
         </h2>
         <ResponsiveContainer width="100%" height={300}>

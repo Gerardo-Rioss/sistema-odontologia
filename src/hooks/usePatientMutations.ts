@@ -1,17 +1,14 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import type { Patient, ApiResponse } from '@/types';
 import type { CreatePatientDTO, UpdatePatientDTO } from '@/lib/validations';
-
-// ─── Helpers ──────────────────────────────────────────────────
 
 async function extractError(res: Response): Promise<never> {
   const body = await res.json().catch(() => ({}));
   throw new Error(body.error || 'Error en la operación');
 }
-
-// ─── API Calls ────────────────────────────────────────────────
 
 async function createPatient(data: CreatePatientDTO): Promise<Patient> {
   const res = await fetch('/api/patients', {
@@ -42,14 +39,6 @@ async function deletePatient(id: string): Promise<void> {
   if (!res.ok) await extractError(res);
 }
 
-// ─── Hook ─────────────────────────────────────────────────────
-
-/**
- * React Query mutations para CRUD de pacientes.
- *
- * En onSuccess se invalidan tanto el queryKey `['patients']` (lista)
- * como el queryKey `['patients', id]` (detalle individual).
- */
 export function usePatientMutations() {
   const queryClient = useQueryClient();
 
@@ -60,17 +49,29 @@ export function usePatientMutations() {
 
   const create = useMutation({
     mutationFn: createPatient,
-    onSuccess: (_data) => invalidate(),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Paciente creado exitosamente');
+    },
+    onError: (err) => toast.error(`Error al crear paciente: ${err.message}`),
   });
 
   const update = useMutation({
     mutationFn: updatePatient,
-    onSuccess: (_data, variables) => invalidate(variables.id),
+    onSuccess: (_data, variables) => {
+      invalidate(variables.id);
+      toast.success('Paciente actualizado exitosamente');
+    },
+    onError: (err) => toast.error(`Error al actualizar paciente: ${err.message}`),
   });
 
   const remove = useMutation({
     mutationFn: deletePatient,
-    onSuccess: (_data, id) => invalidate(id),
+    onSuccess: (_data, id) => {
+      invalidate(id);
+      toast.success('Paciente eliminado');
+    },
+    onError: (err) => toast.error(`Error al eliminar paciente: ${err.message}`),
   });
 
   return {

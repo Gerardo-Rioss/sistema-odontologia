@@ -42,7 +42,7 @@ jest.mock("@/components/dashboard/StatsCard", () => ({
     trend?: unknown;
   }) => (
     <div data-testid={`stats-${label}`}>
-      {loading && <div role="status">Loading</div>}
+      {loading && <div data-slot="skeleton">Loading</div>}
       {error && <div role="alert">{error}</div>}
       {!loading && !error && <span>{value}</span>}
     </div>
@@ -77,7 +77,7 @@ jest.mock("@/components/ui/Spinner", () => ({
   ),
 }));
 
-jest.mock("@/components/ui/Button", () => ({
+jest.mock("@/components/ui/button", () => ({
   Button: ({
     children,
     variant,
@@ -89,26 +89,57 @@ jest.mock("@/components/ui/Button", () => ({
     size?: string;
     className?: string;
   }) => (
-    <button data-testid={`btn-${variant ?? "primary"}`} className={className}>
+    <button data-testid={`btn-${variant ?? "default"}`} className={className}>
       {children}
     </button>
   ),
 }));
 
-jest.mock("@/components/ui/Card", () => ({
+jest.mock("@/components/ui/card", () => ({
   Card: ({
     header,
     children,
+    className,
   }: {
     header?: React.ReactNode;
     children: React.ReactNode;
+    className?: string;
   }) => (
-    <div data-testid="card">
+    <div data-testid="card" className={className}>
       {header}
       {children}
     </div>
   ),
+  CardHeader: ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }) => <div className={className}>{children}</div>,
+  CardContent: ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }) => <div className={className}>{children}</div>,
 }));
+
+jest.mock("lucide-react", () => {
+  const Icon = (props: Record<string, unknown>) => (
+    <span data-lucide-icon="mock" {...props} />
+  );
+  return {
+    CalendarDays: Icon,
+    Users: Icon,
+    DollarSign: Icon,
+    AlertTriangle: Icon,
+    Plus: Icon,
+    UserPlus: Icon,
+    BarChart3: Icon,
+  };
+});
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -242,7 +273,6 @@ describe("Dashboard Home — vacío", () => {
 
     render(<DashboardPage />);
 
-    // StatsCards should render even with zero values
     expect(screen.getByTestId("stats-Citas hoy")).toBeDefined();
     expect(screen.getByTestId("stats-Pacientes nuevos")).toBeDefined();
   });
@@ -273,7 +303,6 @@ describe("Dashboard Home — error", () => {
 
     const alert = screen.getByRole("alert");
     expect(alert).toBeDefined();
-    // Error text appears twice: title + detail. Use getAllByText.
     const errorTexts = screen.getAllByText("Error al cargar estadísticas");
     expect(errorTexts.length).toBeGreaterThanOrEqual(1);
   });
@@ -298,7 +327,6 @@ describe("Dashboard Home — error", () => {
 
     render(<DashboardPage />);
 
-    // StatsCards should receive loading=true
     const statsCard = screen.getByTestId("stats-Citas hoy");
     expect(statsCard).toBeDefined();
   });

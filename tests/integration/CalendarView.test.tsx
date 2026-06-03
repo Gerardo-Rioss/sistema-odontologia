@@ -48,6 +48,16 @@ jest.mock("@/lib/utils", () => ({
     classes.filter(Boolean).join(" "),
 }));
 
+// Mock date-fns isSameDay to treat May 15, 2026 as "today"
+jest.mock("date-fns", () => ({
+  ...jest.requireActual("date-fns"),
+  isSameDay: (date1: Date, date2: Date) => {
+    const actual = jest.requireActual("date-fns");
+    const mockToday = new Date(2026, 4, 15);
+    return actual.isSameDay(date1, mockToday) || actual.isSameDay(date1, date2);
+  },
+}));
+
 // ─── Helpers ──────────────────────────────────────────────────
 
 function makeCalendarDay(

@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useStatistics } from "@/hooks/useStatistics";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { Spinner } from "@/components/ui/Spinner";
+import { CalendarDays, Users, CheckCircle2, XCircle, BarChart3 } from "lucide-react";
 
 /**
  * ChartsSection se importa dinámicamente con ssr: false para excluir
@@ -20,32 +21,6 @@ const ChartsSection = dynamic(
       </div>
     ),
   },
-);
-
-// ─── Íconos SVG inline ─────────────────────────────────────────
-
-const CalendarIcon = (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-  </svg>
-);
-
-const PeopleIcon = (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-  </svg>
-);
-
-const CheckIcon = (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-const CancelIcon = (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-  </svg>
 );
 
 // ─── Componente ────────────────────────────────────────────────
@@ -79,12 +54,12 @@ export default function StatisticsPage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">Estadísticas</h1>
-        <div className="rounded-xl bg-red-50 p-6 text-center shadow-sm dark:bg-red-950" role="alert">
-          <p className="text-sm font-medium text-red-800 dark:text-red-300">
+        <h1 className="text-2xl font-bold text-foreground">Estadísticas</h1>
+        <div className="rounded-xl border border-destructive/50 bg-destructive/10 p-6 text-center shadow-sm" role="alert">
+          <p className="text-sm font-medium text-destructive">
             Error al cargar estadísticas
           </p>
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+          <p className="mt-1 text-sm text-destructive">{error}</p>
         </div>
       </div>
     );
@@ -94,7 +69,7 @@ export default function StatisticsPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">Estadísticas</h1>
+        <h1 className="text-2xl font-bold text-foreground">Estadísticas</h1>
         <div className="flex justify-center py-16">
           <Spinner size="lg" />
         </div>
@@ -108,21 +83,13 @@ export default function StatisticsPage() {
   if (!hasData) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">Estadísticas</h1>
-        <div className="rounded-xl bg-white p-12 text-center shadow-sm dark:bg-gray-900">
-          <svg
-            className="mx-auto h-16 w-16 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          <h2 className="mt-4 text-lg font-semibold text-gray-700">
+        <h1 className="text-2xl font-bold text-foreground">Estadísticas</h1>
+        <div className="rounded-xl border bg-card p-12 text-center shadow-sm">
+          <BarChart3 className="mx-auto h-16 w-16 text-muted-foreground/50" />
+          <h2 className="mt-4 text-lg font-semibold text-foreground">
             Sin datos suficientes
           </h2>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             Registrá citas para comenzar a ver estadísticas del consultorio.
           </p>
         </div>
@@ -132,24 +99,24 @@ export default function StatisticsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Estadísticas</h1>
+      <h1 className="text-2xl font-bold text-foreground">Estadísticas</h1>
 
       {/* ── Stats Cards Row ── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          icon={CalendarIcon}
+          icon={<CalendarDays className="h-6 w-6" />}
           label="Citas totales (12m)"
           value={overview.totalAppointments}
           accent="blue"
         />
         <StatsCard
-          icon={PeopleIcon}
+          icon={<Users className="h-6 w-6" />}
           label="Pacientes registrados"
           value={overview.totalPatients}
           accent="green"
         />
         <StatsCard
-          icon={CheckIcon}
+          icon={<CheckCircle2 className="h-6 w-6" />}
           label="Tasa de completadas"
           value={`${overview.completionRate}%`}
           accent="purple"
@@ -159,7 +126,7 @@ export default function StatisticsPage() {
           }}
         />
         <StatsCard
-          icon={CancelIcon}
+          icon={<XCircle className="h-6 w-6" />}
           label="Tasa de cancelación"
           value={`${cancellationRate}%`}
           accent="red"
@@ -173,19 +140,19 @@ export default function StatisticsPage() {
 
       {/* Nuevos vs recurrentes (mini cards) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-xl bg-white p-5 shadow-sm dark:bg-gray-900">
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pacientes nuevos</p>
+        <div className="rounded-xl border bg-card p-5 shadow-sm">
+          <p className="text-sm font-medium text-muted-foreground">Pacientes nuevos</p>
           <p className="mt-1 text-3xl font-bold text-blue-600 dark:text-blue-400">
             {newVsReturning.newPatients}
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">Con 1 sola cita en 12 meses</p>
+          <p className="text-xs text-muted-foreground">Con 1 sola cita en 12 meses</p>
         </div>
-        <div className="rounded-xl bg-white p-5 shadow-sm dark:bg-gray-900">
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pacientes recurrentes</p>
+        <div className="rounded-xl border bg-card p-5 shadow-sm">
+          <p className="text-sm font-medium text-muted-foreground">Pacientes recurrentes</p>
           <p className="mt-1 text-3xl font-bold text-green-600 dark:text-green-400">
             {newVsReturning.returningPatients}
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">Con 2 o más citas en 12 meses</p>
+          <p className="text-xs text-muted-foreground">Con 2 o más citas en 12 meses</p>
         </div>
       </div>
 
