@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { AlertCircle, TrendingUp, TrendingDown } from "lucide-react";
+import { useCountUp } from "@/hooks/useCountUp";
 
 interface StatsCardProps {
   icon: ReactNode;
@@ -61,6 +62,7 @@ export const StatsCard = React.memo(function StatsCard({
   className,
 }: StatsCardProps) {
   const styles = accentStyles[accent];
+  const animatedValue = useCountUp(value);
 
   if (error) {
     return (
@@ -93,7 +95,7 @@ export const StatsCard = React.memo(function StatsCard({
           {loading ? (
             <Skeleton className="ml-auto h-8 w-16" />
           ) : (
-            <p className="text-2xl font-bold">{value}</p>
+            <p className="text-2xl font-bold tabular-nums">{animatedValue}</p>
           )}
           <p className="text-sm text-muted-foreground">{label}</p>
         </div>
