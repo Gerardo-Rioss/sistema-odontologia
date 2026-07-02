@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { registerSchema } from "@/lib/validations";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 /**
  * Esquema extendido con confirmación de contraseña para el formulario cliente.
@@ -87,151 +91,122 @@ export default function RegisterPage() {
     }
   };
 
-  const inputClass = (fieldError: unknown) =>
-    `mt-1 block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 dark:text-gray-100 dark:placeholder:text-gray-500 ${
-      fieldError
-        ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-700"
-        : "border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700"
-    }`;
-
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Crear Cuenta</h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <h1 className="text-2xl font-bold text-foreground">Crear Cuenta</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           Registrate para comenzar a usar el sistema
         </p>
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-400">
+        <div className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}
       {success && (
-        <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-400">
+        <div className="rounded-xl bg-green-100 p-3 text-sm text-green-800 dark:bg-green-950 dark:text-green-400">
           {success}
         </div>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label
-            htmlFor="firstName"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Nombre
-          </label>
-          <input
+          <Label htmlFor="firstName">Nombre</Label>
+          <Input
             id="firstName"
             type="text"
             {...register("firstName")}
             placeholder="Juan"
-            className={inputClass(errors.firstName)}
+            aria-invalid={!!errors.firstName}
           />
           {errors.firstName && (
-            <p className="mt-1 text-sm text-red-600">
+            <p className="mt-1 text-sm text-destructive">
               {errors.firstName.message}
             </p>
           )}
         </div>
 
         <div>
-          <label
-            htmlFor="lastName"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Apellido
-          </label>
-          <input
+          <Label htmlFor="lastName">Apellido</Label>
+          <Input
             id="lastName"
             type="text"
             {...register("lastName")}
             placeholder="Pérez"
-            className={inputClass(errors.lastName)}
+            aria-invalid={!!errors.lastName}
           />
           {errors.lastName && (
-            <p className="mt-1 text-sm text-red-600">
+            <p className="mt-1 text-sm text-destructive">
               {errors.lastName.message}
             </p>
           )}
         </div>
 
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Correo Electrónico
-          </label>
-          <input
+          <Label htmlFor="email">Correo Electrónico</Label>
+          <Input
             id="email"
             type="email"
             {...register("email")}
             placeholder="correo@consultorio.com"
-            className={inputClass(errors.email)}
+            aria-invalid={!!errors.email}
           />
           {errors.email && (
-            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+            <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>
           )}
         </div>
 
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Contraseña
-          </label>
-          <input
+          <Label htmlFor="password">Contraseña</Label>
+          <Input
             id="password"
             type="password"
             {...register("password")}
             placeholder="Mínimo 8 caracteres"
-            className={inputClass(errors.password)}
+            aria-invalid={!!errors.password}
           />
           {errors.password && (
-            <p className="mt-1 text-sm text-red-600">
+            <p className="mt-1 text-sm text-destructive">
               {errors.password.message}
             </p>
           )}
         </div>
 
         <div>
-          <label
-            htmlFor="confirmPassword"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Confirmar Contraseña
-          </label>
-          <input
+          <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+          <Input
             id="confirmPassword"
             type="password"
             {...register("confirmPassword")}
             placeholder="Repetí la contraseña"
-            className={inputClass(errors.confirmPassword)}
+            aria-invalid={!!errors.confirmPassword}
           />
           {errors.confirmPassword && (
-            <p className="mt-1 text-sm text-red-600">
+            <p className="mt-1 text-sm text-destructive">
               {errors.confirmPassword.message}
             </p>
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 dark:focus:ring-offset-gray-900"
-        >
-          {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
-        </button>
+        <Button type="submit" disabled={isLoading} className="w-full">
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creando cuenta...
+            </>
+          ) : (
+            "Crear Cuenta"
+          )}
+        </Button>
       </form>
 
-      <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-center text-sm text-muted-foreground">
         ¿Ya tenés cuenta?{" "}
         <Link
           href="/login"
-          className="font-medium text-blue-600 hover:text-blue-500"
+          className="font-medium text-primary hover:text-primary/80"
         >
           Iniciá Sesión
         </Link>
