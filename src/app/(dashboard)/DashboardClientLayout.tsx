@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider } from "@/components/auth/SessionProvider";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
+import { PageTransition } from "@/components/ui/PageTransition";
 import { useStore } from "@/store/useStore";
 
 /**
@@ -37,7 +38,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         <Header />
 
         {/* Page content — padding responsivo */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          <PageTransition>{children}</PageTransition>
+        </main>
       </div>
     </div>
   );
