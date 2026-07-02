@@ -68,7 +68,7 @@ export function Sidebar() {
       </div>
 
       {/* Navegación */}
-      <nav className="flex-1 space-y-1 p-2" role="navigation">
+      <nav className="flex-1 space-y-1 p-2" role="navigation" data-onboarding="sidebar">
         {navItems.map((item) => {
           const isActive =
             item.href === "/dashboard"

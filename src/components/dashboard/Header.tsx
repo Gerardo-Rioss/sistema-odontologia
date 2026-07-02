@@ -105,7 +105,7 @@ export function Header() {
         )}
 
         <DropdownMenu>
-          <DropdownMenuTrigger>
+                  <DropdownMenuTrigger data-onboarding="user-menu">
             <Avatar className="h-8 w-8 cursor-pointer">
               <AvatarFallback className="bg-primary text-sm text-primary-foreground">
                 {avatarInitial}

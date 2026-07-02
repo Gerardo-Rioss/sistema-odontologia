@@ -43,7 +43,7 @@ export default function DashboardPage() {
       <h1 className="text-2xl font-bold">Panel Principal</h1>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" data-onboarding="stats">
         <StatsCard
           icon={<CalendarDays className="h-6 w-6" />}
           label="Citas hoy"
@@ -111,7 +111,7 @@ export default function DashboardPage() {
             <CardContent>
               <div className="flex flex-col gap-3">
                 <Link href="/dashboard/appointments">
-                  <Button className="w-full">
+                                  <Button className="w-full" data-onboarding="new-appointment">
                     <Plus className="mr-2 h-4 w-4" />
                     Nueva cita
                   </Button>

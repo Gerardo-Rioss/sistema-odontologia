@@ -7,6 +7,7 @@ import { SessionProvider } from "@/components/auth/SessionProvider";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import { PageTransition } from "@/components/ui/PageTransition";
+import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { useStore } from "@/store/useStore";
 
 /**
@@ -31,6 +32,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen bg-background">
       {/* Sidebar: gestiona su propia responsividad (overlay <768px, fixed ≥768px) */}
       <Sidebar />
+
+      {/* Onboarding tour — solo se muestra la primera vez */}
+      <OnboardingTour />
 
       {/* Main content area */}
       <div className="flex flex-1 flex-col overflow-hidden">
