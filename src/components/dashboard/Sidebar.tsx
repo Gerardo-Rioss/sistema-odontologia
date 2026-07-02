@@ -14,6 +14,7 @@ import {
   Smile,
 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 interface NavItem {
   label: string;
@@ -74,7 +75,7 @@ export function Sidebar() {
               ? pathname === "/dashboard"
               : pathname.startsWith(item.href);
 
-          return (
+          const link = (
             <Link
               key={item.href}
               href={item.href}
@@ -86,10 +87,23 @@ export function Sidebar() {
               )}
               aria-current={isActive ? "page" : undefined}
             >
-              <span className="mr-3 flex-shrink-0">{item.icon}</span>
+              <span className={cn("flex-shrink-0", sidebarOpen && "mr-3")}>
+                {item.icon}
+              </span>
               {sidebarOpen && <span>{item.label}</span>}
             </Link>
           );
+
+          // En modo colapsado, envolver con tooltip
+          if (!sidebarOpen) {
+            return (
+              <Tooltip key={item.href} content={item.label} side="right">
+                {link}
+              </Tooltip>
+            );
+          }
+
+          return link;
         })}
       </nav>
 
