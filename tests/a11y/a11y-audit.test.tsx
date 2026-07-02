@@ -58,16 +58,7 @@ jest.mock("@/components/ui/alert", () => ({
   ),
 }));
 
-jest.mock("lucide-react", () => {
-  const Icon = ({ "aria-hidden": ariaHidden, className }: { "aria-hidden"?: boolean; className?: string }) => (
-    <span aria-hidden={ariaHidden} className={className} />
-  );
-  return {
-    AlertCircle: Icon,
-    TrendingUp: Icon,
-    TrendingDown: Icon,
-  };
-});
+// lucide-react is mocked globally in tests/__mocks__/lucide-react.tsx
 
 // ─── Helper: ejecutar axe y verificar ─────────────────────────
 

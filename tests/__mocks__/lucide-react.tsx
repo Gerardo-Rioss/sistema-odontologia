@@ -2,14 +2,13 @@
  * Mock for lucide-react icons in Jest tests.
  * Returns a simple span for any icon import.
  */
+import React from "react";
+
 const MockIcon = (props: Record<string, unknown>) => {
-  return {
-    type: "span",
-    props: {
-      ...props,
-      "data-lucide-icon": "mock",
-    },
-  };
+  return React.createElement("span", {
+    ...props,
+    "data-lucide-icon": "mock",
+  });
 };
 
 export const CalendarDays = MockIcon;
@@ -26,6 +25,7 @@ export const LogOut = MockIcon;
 export const Search = MockIcon;
 export const X = MockIcon;
 export const ChevronLeft = MockIcon;
+export const ChevronRight = MockIcon;
 export const Smile = MockIcon;
 export const LayoutDashboard = MockIcon;
 export const Settings = MockIcon;
@@ -43,5 +43,13 @@ export const ChevronUp = MockIcon;
 export const Check = MockIcon;
 export const ChevronsUpDown = MockIcon;
 export const MoreHorizontal = MockIcon;
+export const Pencil = MockIcon;
+export const Trash2 = MockIcon;
+export const UserRound = MockIcon;
+export const AlertCircle = MockIcon;
+export const TrendingUp = MockIcon;
+export const TrendingDown = MockIcon;
+export const CheckCircle2 = MockIcon;
+export const XCircle = MockIcon;
 
 export default MockIcon;

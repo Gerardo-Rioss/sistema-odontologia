@@ -47,8 +47,10 @@ jest.mock("@/components/ui/alert", () => ({
   AlertDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-jest.mock("lucide-react", () => ({
-  AlertCircle: () => <span data-lucide="alert-circle" />,
+// lucide-react is mocked globally in tests/__mocks__/lucide-react.tsx
+
+jest.mock("@/hooks/useCountUp", () => ({
+  useCountUp: (value) => value,
 }));
 
 // ─── StatsCard ────────────────────────────────────────────────
