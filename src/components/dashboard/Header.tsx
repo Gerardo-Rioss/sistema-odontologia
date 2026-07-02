@@ -1,5 +1,7 @@
 "use client";
 
+import { Fragment } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useStore } from "@/store/useStore";
@@ -12,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, Sun, Moon, LogOut } from "lucide-react";
+import { Menu, Sun, Moon, LogOut, ChevronRight } from "lucide-react";
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -23,9 +25,22 @@ const PAGE_TITLES: Record<string, string> = {
 };
 
 /**
+ * Genera breadcrumbs a partir del pathname actual.
+ * Ej: "/dashboard/appointments" → [{label:"Dashboard", href:"/dashboard"}, {label:"Citas", href:"/dashboard/appointments", isLast:true}]
+ */
+function getBreadcrumbs(pathname: string) {
+  const segments = pathname.split("/").filter(Boolean);
+  return segments.map((_, i) => {
+    const href = "/" + segments.slice(0, i + 1).join("/");
+    const label = PAGE_TITLES[href] ?? segments[i];
+    return { label, href, isLast: i === segments.length - 1 };
+  });
+}
+
+/**
  * Barra superior del dashboard.
  *
- * - Usa lucide-react para íconos.
+ * - Breadcrumbs de navegación en desktop.
  * - DropdownMenu para usuario con toggle de tema y logout.
  * - Avatar de shadcn para foto de usuario.
  */
@@ -35,12 +50,13 @@ export function Header() {
   const toggleSidebar = useStore((s) => s.toggleSidebar);
   const { theme, setTheme } = useTheme();
 
+  const breadcrumbs = getBreadcrumbs(pathname);
   const pageTitle = PAGE_TITLES[pathname] ?? "Dashboard";
   const avatarInitial = user?.name?.charAt(0).toUpperCase() ?? "?";
 
   return (
     <header className="flex h-16 items-center justify-between border-b bg-card px-6 text-card-foreground shadow-sm">
-      {/* Izquierda: hamburger + título */}
+      {/* Izquierda: hamburger + breadcrumbs + título */}
       <div className="flex items-center gap-3">
         <button
           onClick={toggleSidebar}
@@ -49,7 +65,35 @@ export function Header() {
         >
           <Menu className="h-6 w-6" />
         </button>
-        <h2 className="text-lg font-semibold">{pageTitle}</h2>
+
+        {/* Breadcrumbs — visible solo en pantallas ≥ sm */}
+        <nav
+          aria-label="Breadcrumb"
+          className="hidden items-center gap-1.5 text-sm sm:flex"
+        >
+          {breadcrumbs.map((crumb) => (
+            <Fragment key={crumb.href}>
+              {!crumb.isLast ? (
+                <>
+                  <Link
+                    href={crumb.href}
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {crumb.label}
+                  </Link>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+                </>
+              ) : (
+                <span className="font-medium text-foreground">
+                  {crumb.label}
+                </span>
+              )}
+            </Fragment>
+          ))}
+        </nav>
+
+        {/* Título actual — visible cuando no hay breadcrumbs */}
+        <h2 className="text-lg font-semibold sm:hidden">{pageTitle}</h2>
       </div>
 
       {/* Derecha: usuario + dropdown */}
@@ -63,7 +107,7 @@ export function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Avatar className="h-8 w-8 cursor-pointer">
-              <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+              <AvatarFallback className="bg-primary text-sm text-primary-foreground">
                 {avatarInitial}
               </AvatarFallback>
             </Avatar>
@@ -78,7 +122,11 @@ export function Header() {
                 <DropdownMenuSeparator />
               </>
             )}
-            <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+            <DropdownMenuItem
+              onClick={() =>
+                setTheme(theme === "dark" ? "light" : "dark")
+              }
+            >
               {theme === "dark" ? (
                 <Sun className="mr-2 h-4 w-4" />
               ) : (
