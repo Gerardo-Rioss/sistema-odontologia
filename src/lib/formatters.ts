@@ -1,11 +1,34 @@
 /**
+ * Formatters de fechas, horas, moneda y teléfono.
+ *
+ * ⚠️ IMPORTANTE (timezone): PostgreSQL guarda las fechas de calendario como
+ * `@db.Date` → JSON las serializa como medianoche UTC ("2026-08-18T00:00:00.000Z").
+ * Si se formatea con `new Date(iso)` + Intl en una zona negativa (ej: Argentina
+ * GMT-3), la medianoche UTC se convierte al día ANTERIOR 21:00 → muestra 17/08
+ * en vez de 18/08. Por eso parseamos la parte YYYY-MM-DD manualmente (date-only).
+ */
+
+/** Extrae solo la parte de fecha (YYYY-MM-DD) sin timezone. */
+function toDateOnly(date: Date | string): Date {
+  if (typeof date === "string") {
+    const match = date.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    }
+  }
+  return new Date(date);
+}
+
+/**
  * Formatea una fecha (Date o string ISO) a formato largo en español.
  * Ejemplo: "15 de junio de 2026"
  */
 export function formatDate(date: Date | string): string {
   return new Intl.DateTimeFormat("es-ES", {
-    dateStyle: "long",
-  }).format(new Date(date));
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(toDateOnly(date));
 }
 
 /**
@@ -17,7 +40,7 @@ export function formatShortDate(date: Date | string): string {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-  }).format(new Date(date));
+  }).format(toDateOnly(date));
 }
 
 /**
@@ -40,24 +63,31 @@ export function formatCurrency(
 ): string {
   return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: locale === "es-AR" ? "ARS" : "CLP",
-    minimumFractionDigits: 0,
+    currency: locale === "es-CL" ? "CLP" : "ARS",
   }).format(amount);
 }
 
 /**
- * Formatea un número de teléfono (Chile o Argentina).
- * Detecta automáticamente según el largo del número limpio.
- * Ejemplo 9 dígitos (Chile): "9 1234 5678"
- * Ejemplo 11 dígitos (internacional): "+56 9 1234 5678"
+ * Formatea un número de teléfono para mostrar.
+ * Mantiene el formato original si no puede normalizarlo.
+ * Ejemplo: "+5493624567890" → "+549 362 456-7890" (largo)
+ * Ejemplo: "3624567890" → "362 456-7890" (local)
  */
 export function formatPhoneNumber(phone: string): string {
-  const cleaned = phone.replace(/\D/g, "");
-  if (cleaned.length === 9) {
-    return `${cleaned.slice(0, 1)} ${cleaned.slice(1, 5)} ${cleaned.slice(5)}`;
+  if (!phone) return "";
+  const digits = phone.replace(/\D/g, "");
+
+  if (phone.startsWith("+549") && digits.length === 13) {
+    return `+549 ${digits.slice(3, 6)} ${digits.slice(6, 9)}-${digits.slice(9)}`;
   }
-  if (cleaned.length === 11) {
-    return `+${cleaned.slice(0, 2)} ${cleaned.slice(2, 3)} ${cleaned.slice(3, 7)} ${cleaned.slice(7)}`;
+  if (phone.startsWith("+54") && digits.length === 12) {
+    return `+54 ${digits.slice(2, 5)} ${digits.slice(5, 8)}-${digits.slice(8)}`;
+  }
+  if (digits.length === 10) {
+    return `${digits.slice(0, 3)} ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+  if (digits.length === 8) {
+    return `${digits.slice(0, 4)}-${digits.slice(4)}`;
   }
   return phone;
 }

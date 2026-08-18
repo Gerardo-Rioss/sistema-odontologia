@@ -192,20 +192,22 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
                 onClick={() => handleDayClick(day.date)}
                 onKeyDown={(e) => handleKeyDown(e, day.date)}
                 className={cn(
-                  "flex flex-col items-center rounded-lg p-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "group flex min-h-[44px] flex-col items-center rounded-lg border border-transparent p-1.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   !day.isCurrentMonth && !today && "opacity-40",
                   today
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "hover:bg-muted",
+                    ? "border-primary/30 bg-primary/10 hover:bg-primary/15"
+                    : "hover:border-border hover:bg-muted/60",
                   currentView === "day" && "flex-row items-start gap-3 p-4"
                 )}
               >
                 {/* Número de día */}
                 <span
                   className={cn(
-                    "text-xs font-medium",
-                    today ? "text-primary-foreground" : "text-foreground",
-                    currentView === "day" && "text-lg"
+                    "flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium transition-colors",
+                    today
+                      ? "bg-primary font-bold text-primary-foreground shadow-sm shadow-primary/30"
+                      : "text-foreground",
+                    currentView === "day" && "h-9 w-9 text-lg"
                   )}
                 >
                   {currentView === "day"
@@ -228,6 +230,16 @@ export function CalendarView({ onDayClick, className }: CalendarViewProps) {
                       />
                     ))}
                   </div>
+                )}
+
+                {/* Contador de citas del día (chip) */}
+                {currentView !== "day" && appointmentCount > 0 && (
+                  <span
+                    className="mt-1 hidden rounded-full bg-primary/10 px-1.5 py-px text-[10px] font-semibold tabular-nums text-primary group-hover:inline-block"
+                    aria-hidden="true"
+                  >
+                    {appointmentCount}
+                  </span>
                 )}
 
                 {/* Lista de citas en vista diaria */}

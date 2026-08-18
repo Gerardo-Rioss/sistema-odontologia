@@ -125,3 +125,15 @@ export const resetPasswordSchema = z.object({
 });
 
 export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
+
+// ─── Historia Clínica ─────────────────────────────────────────
+export const UpdateMedicalRecordDTO = z.object({
+  allergies: z.string().optional().nullable(),
+  medications: z.string().optional().nullable(),
+  conditions: z.string().optional().nullable(),
+  bloodType: z.string().optional().nullable(),
+  dentalHistory: z.string().optional().nullable(),
+  habits: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+});
+export type UpdateMedicalRecordDTO = z.infer<typeof UpdateMedicalRecordDTO>;

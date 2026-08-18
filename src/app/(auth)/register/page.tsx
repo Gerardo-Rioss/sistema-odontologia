@@ -117,6 +117,7 @@ export default function RegisterPage() {
           <Input
             id="firstName"
             type="text"
+            autoComplete="given-name"
             {...register("firstName")}
             placeholder="Juan"
             aria-invalid={!!errors.firstName}
@@ -133,6 +134,7 @@ export default function RegisterPage() {
           <Input
             id="lastName"
             type="text"
+            autoComplete="family-name"
             {...register("lastName")}
             placeholder="Pérez"
             aria-invalid={!!errors.lastName}
@@ -149,6 +151,7 @@ export default function RegisterPage() {
           <Input
             id="email"
             type="email"
+            autoComplete="email"
             {...register("email")}
             placeholder="correo@consultorio.com"
             aria-invalid={!!errors.email}
@@ -163,6 +166,7 @@ export default function RegisterPage() {
           <Input
             id="password"
             type="password"
+            autoComplete="new-password"
             {...register("password")}
             placeholder="Mínimo 8 caracteres"
             aria-invalid={!!errors.password}
@@ -179,6 +183,7 @@ export default function RegisterPage() {
           <Input
             id="confirmPassword"
             type="password"
+            autoComplete="new-password"
             {...register("confirmPassword")}
             placeholder="Repetí la contraseña"
             aria-invalid={!!errors.confirmPassword}

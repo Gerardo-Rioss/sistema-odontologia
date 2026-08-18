@@ -22,7 +22,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  name?: string | null; // @deprecated — usar firstName + lastName
+  name?: string | null;
   role: Role;
   emailVerified: Date | null;
   createdAt: Date;
@@ -102,7 +102,7 @@ export interface Appointment {
   createdAt: Date;
   updatedAt: Date;
 
-  // Relaciones (opcionales, presentes al hacer include)
+  // Relaciones
   user?: User;
   patient?: Patient;
   whatsappMessages?: WhatsAppMessage[];
@@ -135,7 +135,6 @@ export interface Message {
   readAt: Date | null;
   createdAt: Date;
 
-  // Relaciones (opcionales, presentes al hacer include)
   sender?: User;
   receiver?: User;
   appointment?: Appointment;
@@ -179,7 +178,6 @@ export interface WhatsAppMessage {
   appointmentId: string | null;
   createdAt: Date;
 
-  // Relaciones (opcionales, presentes al hacer include)
   user?: User;
   appointment?: Appointment;
 }
@@ -241,6 +239,38 @@ export interface AvailableSlot {
   time: string;
   available: boolean;
 }
+
+// ─── Historia Clínica ─────────────────────────────────────────
+export interface MedicalRecord {
+  id: string;
+  patientId: string;
+  allergies: string | null;
+  medications: string | null;
+  conditions: string | null;
+  bloodType: string | null;
+  dentalHistory: string | null;
+  habits: string | null;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ─── Archivo adjunto ──────────────────────────────────────────
+export interface Attachment {
+  id: string;
+  patientId: string;
+  userId: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  filePath: string;
+  category: string | null;
+  notes: string | null;
+  createdAt: Date;
+}
+
+// ─── Categorías de archivo ────────────────────────────────────
+export type AttachmentCategory = "RADIOGRAFIA" | "DOCUMENTO" | "FOTO" | "RECETA" | "OTRO";
 
 // ─── Respuesta de API genérica ───────────────────────────────
 export interface ApiResponse<T = unknown> {

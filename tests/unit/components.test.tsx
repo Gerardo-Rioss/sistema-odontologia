@@ -159,7 +159,7 @@ describe("StatsCard", () => {
 
     // La tarjeta debe tener la clase de borde azul
     const card = container.firstChild as HTMLElement;
-    expect(card.className).toContain("border-l-blue-500");
+    expect(card.className).toContain("border-l-teal-500");
   });
 
   it("debe aplicar acento rojo cuando se especifica", () => {
@@ -173,7 +173,7 @@ describe("StatsCard", () => {
     );
 
     const card = container.firstChild as HTMLElement;
-    expect(card.className).toContain("border-l-red-500");
+    expect(card.className).toContain("border-l-rose-500");
   });
 
   it("debe aplicar acento púrpura cuando se especifica", () => {
@@ -187,7 +187,7 @@ describe("StatsCard", () => {
     );
 
     const card = container.firstChild as HTMLElement;
-    expect(card.className).toContain("border-l-purple-500");
+    expect(card.className).toContain("border-l-violet-500");
   });
 
   it("debe renderizar tendencia sin label opcional", () => {
@@ -213,31 +213,31 @@ describe("StatusBadge", () => {
     expect(screen.getByText("Pendiente")).toBeDefined();
     const badge = container.firstChild as HTMLElement;
     expect(badge.getAttribute("role")).toBe("status");
-    expect(badge.className).toContain("bg-yellow-100");
-    expect(badge.className).toContain("text-yellow-800");
+    expect(badge.className).toContain("bg-amber-100");
+    expect(badge.className).toContain("text-black");
   });
 
   it("debe renderizar CONFIRMED con color verde", () => {
     const { container } = render(<StatusBadge status="CONFIRMED" />);
     const badge = container.firstChild as HTMLElement;
-    expect(badge.className).toContain("bg-green-100");
-    expect(badge.className).toContain("text-green-800");
+    expect(badge.className).toContain("bg-emerald-100");
+    expect(badge.className).toContain("text-black");
     expect(screen.getByText("Confirmada")).toBeDefined();
   });
 
   it("debe renderizar CANCELLED con color rojo", () => {
     const { container } = render(<StatusBadge status="CANCELLED" />);
     const badge = container.firstChild as HTMLElement;
-    expect(badge.className).toContain("bg-red-100");
-    expect(badge.className).toContain("text-red-800");
+    expect(badge.className).toContain("bg-rose-100");
+    expect(badge.className).toContain("text-black");
     expect(screen.getByText("Cancelada")).toBeDefined();
   });
 
   it("debe renderizar COMPLETED con color azul", () => {
     const { container } = render(<StatusBadge status="COMPLETED" />);
     const badge = container.firstChild as HTMLElement;
-    expect(badge.className).toContain("bg-blue-100");
-    expect(badge.className).toContain("text-blue-800");
+    expect(badge.className).toContain("bg-sky-100");
+    expect(badge.className).toContain("text-black");
     expect(screen.getByText("Completada")).toBeDefined();
   });
 

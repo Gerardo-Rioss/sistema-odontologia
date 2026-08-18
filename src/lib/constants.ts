@@ -19,13 +19,29 @@ export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
   OTRO: "Otro",
 };
 
-/** Colores de fondo y texto para badges de tipo de cita (Tailwind). */
+/**
+ * Colores de fondo y texto para badges de tipo de cita.
+ * Fondos más presentes + dot de color + texto saturado → vivos en claro y oscuro.
+ */
 export const APPOINTMENT_TYPE_COLORS: Record<AppointmentType, string> = {
-  LIMPIEZA: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  REVISION: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  URGENCIA: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-  TRATAMIENTO: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-  OTRO: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
+  LIMPIEZA:
+    "bg-emerald-100 text-black border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40",
+  REVISION:
+    "bg-sky-100 text-black border-sky-300 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/40",
+  URGENCIA:
+    "bg-rose-100 text-black border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40",
+  TRATAMIENTO:
+    "bg-amber-100 text-black border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40",
+  OTRO: "bg-slate-100 text-black border-slate-200 dark:bg-slate-500/20 dark:text-slate-300 dark:border-slate-500/40",
+};
+
+/** Puntito de color sólido para los badges de tipo. */
+export const APPOINTMENT_TYPE_DOTS: Record<AppointmentType, string> = {
+  LIMPIEZA: "bg-emerald-500",
+  REVISION: "bg-sky-500",
+  URGENCIA: "bg-rose-500",
+  TRATAMIENTO: "bg-amber-500",
+  OTRO: "bg-slate-400",
 };
 
 // ─── Etiquetas y colores de estado de cita ────────────────────
@@ -39,13 +55,26 @@ export const STATUS_LABELS: Record<AppointmentStatus, string> = {
 
 /**
  * Colores para badges de estado.
- * PENDING → amarillo, CONFIRMED → verde, CANCELLED → rojo, COMPLETED → azul.
+ * PENDING → amber, CONFIRMED → emerald, CANCELLED → rose, COMPLETED → sky.
+ * Fondos presentes + texto oscuro en claro / brillante en oscuro.
  */
 export const STATUS_COLORS: Record<AppointmentStatus, string> = {
-  PENDING: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-  CONFIRMED: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  CANCELLED: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-  COMPLETED: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  PENDING:
+    "bg-amber-100 text-black border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/40",
+  CONFIRMED:
+    "bg-emerald-100 text-black border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40",
+  CANCELLED:
+    "bg-rose-100 text-black border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40",
+  COMPLETED:
+    "bg-sky-100 text-black border-sky-300 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/40",
+};
+
+/** Puntito de color sólido para los badges de estado. */
+export const STATUS_DOTS: Record<AppointmentStatus, string> = {
+  PENDING: "bg-amber-500",
+  CONFIRMED: "bg-emerald-500",
+  CANCELLED: "bg-rose-500",
+  COMPLETED: "bg-sky-500",
 };
 
 // ─── Días de la semana ────────────────────────────────────────

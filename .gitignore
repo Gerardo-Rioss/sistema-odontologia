@@ -54,3 +54,8 @@ prisma/*.db-journal
 
 # OS
 Thumbs.db
+
+# Archivos de pruebas locales
+cookies.txt
+*.cookie
+

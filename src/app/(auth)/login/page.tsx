@@ -78,6 +78,7 @@ export default function LoginPage() {
           <Input
             id="email"
             type="email"
+            autoComplete="email"
             {...register("email")}
             placeholder="correo@consultorio.com"
             aria-invalid={!!errors.email}
@@ -94,6 +95,7 @@ export default function LoginPage() {
           <Input
             id="password"
             type="password"
+            autoComplete="current-password"
             {...register("password")}
             placeholder="••••••••"
             aria-invalid={!!errors.password}

@@ -117,6 +117,13 @@ jest.mock("@/components/ui/card", () => ({
     children: React.ReactNode;
     className?: string;
   }) => <div className={className}>{children}</div>,
+  CardTitle: ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }) => <div className={className}>{children}</div>,
   CardContent: ({
     children,
     className,
@@ -125,21 +132,6 @@ jest.mock("@/components/ui/card", () => ({
     className?: string;
   }) => <div className={className}>{children}</div>,
 }));
-
-jest.mock("lucide-react", () => {
-  const Icon = (props: Record<string, unknown>) => (
-    <span data-lucide-icon="mock" {...props} />
-  );
-  return {
-    CalendarDays: Icon,
-    Users: Icon,
-    DollarSign: Icon,
-    AlertTriangle: Icon,
-    Plus: Icon,
-    UserPlus: Icon,
-    BarChart3: Icon,
-  };
-});
 
 jest.mock("next/link", () => ({
   __esModule: true,

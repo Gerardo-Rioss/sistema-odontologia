@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useStore } from "@/store/useStore";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   CalendarDays,
@@ -80,17 +81,24 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "group relative flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-accent text-accent-foreground"
+                  ? "text-accent-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               )}
               aria-current={isActive ? "page" : undefined}
             >
-              <span className={cn("flex-shrink-0", sidebarOpen && "mr-3")}>
+              {isActive && (
+                <motion.div
+                  layoutId="sidebar-active"
+                  className="absolute inset-0 rounded-lg bg-accent"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
+              <span className={cn("relative z-10 flex-shrink-0", sidebarOpen && "mr-3")}>
                 {item.icon}
               </span>
-              {sidebarOpen && <span>{item.label}</span>}
+              {sidebarOpen && <span className="relative z-10">{item.label}</span>}
             </Link>
           );
 

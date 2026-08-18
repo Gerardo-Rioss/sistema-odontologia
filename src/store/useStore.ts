@@ -38,9 +38,12 @@ interface AuthSlice {
  */
 interface UISlice {
   sidebarOpen: boolean;
+  /** Título dinámico para el header (ej: nombre del paciente). null = usar el de la ruta. */
+  currentPageTitle: string | null;
 
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
+  setCurrentPageTitle: (title: string | null) => void;
 }
 
 /**
@@ -135,10 +138,12 @@ const createAuthSlice: StateCreator<AppState, [], [], AuthSlice> = (set) => ({
 
 const createUISlice: StateCreator<AppState, [], [], UISlice> = (set) => ({
   sidebarOpen: true,
+  currentPageTitle: null,
 
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
 
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  setCurrentPageTitle: (title) => set({ currentPageTitle: title }),
 });
 
 const createModalSlice: StateCreator<AppState, [], [], ModalSlice> = (set) => ({

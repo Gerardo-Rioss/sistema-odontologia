@@ -41,7 +41,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return {
             id: user.id,
             email: user.email,
-            name: user.firstName,
+            // Nombre completo (firstName + lastName), ignorando el campo
+            // deprecated `name` que solo contiene el título (ej: "Dr.")
+            name: [user.firstName, user.lastName].filter(Boolean).join(" ").trim(),
             role: user.role,
           };
         } catch {

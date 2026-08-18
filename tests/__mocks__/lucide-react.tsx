@@ -1,6 +1,7 @@
 /**
  * Mock for lucide-react icons in Jest tests.
  * Returns a simple span for any icon import.
+ * IMPORTANTE: si agregás un ícono nuevo en el código, agregalo acá también.
  */
 import React from "react";
 
@@ -51,5 +52,16 @@ export const TrendingUp = MockIcon;
 export const TrendingDown = MockIcon;
 export const CheckCircle2 = MockIcon;
 export const XCircle = MockIcon;
+export const Minus = MockIcon;
+export const MessageCircle = MockIcon;
+export const ShieldCheck = MockIcon;
+export const Zap = MockIcon;
+export const ArrowRight = MockIcon;
+export const GitBranch = MockIcon;
+export const Building2 = MockIcon;
+export const Bell = MockIcon;
+export const Stethoscope = MockIcon;
+export const Save = MockIcon;
+export const CornerDownLeft = MockIcon;
 
 export default MockIcon;

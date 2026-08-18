@@ -33,6 +33,14 @@ export const CardHeader = ({
   className?: string;
 }) => <div className={className}>{children}</div>;
 
+export const CardTitle = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => <div className={className}>{children}</div>;
+
 export const CardContent = ({
   children,
   className,

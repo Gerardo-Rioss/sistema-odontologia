@@ -8,6 +8,7 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
+import { CommandPalette } from "@/components/dashboard/CommandPalette";
 import { useStore } from "@/store/useStore";
 
 /**
@@ -35,6 +36,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
       {/* Onboarding tour — solo se muestra la primera vez */}
       <OnboardingTour />
+
+      {/* Búsqueda global (Cmd/Ctrl+K) */}
+      <CommandPalette />
 
       {/* Main content area */}
       <div className="flex flex-1 flex-col overflow-hidden">

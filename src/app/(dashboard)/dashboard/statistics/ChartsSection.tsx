@@ -15,6 +15,7 @@ import {
   Line,
   ResponsiveContainer,
 } from "recharts";
+import { ChartTooltip } from "@/components/ui/ChartTooltip";
 
 // ─── Colores para los gráficos ─────────────────────────────────
 
@@ -22,30 +23,6 @@ const PIE_COLORS = ["#3b82f6", "#22c55e", "#eab308", "#a855f7", "#6b7280"];
 
 const BAR_COLOR = "#3b82f6";
 const LINE_COLOR = "#22c55e";
-
-// ─── Tooltip personalizado en español ──────────────────────────
-
-function CustomTooltip({
-  active,
-  payload,
-  label,
-}: {
-  active?: boolean;
-  payload?: Array<{ name: string; value: number; color: string }>;
-  label?: string;
-}) {
-  if (!active || !payload) return null;
-  return (
-    <div className="rounded-lg border bg-card px-3 py-2 text-sm shadow-lg">
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      {payload.map((entry, i) => (
-        <p key={i} className="text-sm font-semibold" style={{ color: entry.color }}>
-          {entry.name}: {entry.value}
-        </p>
-      ))}
-    </div>
-  );
-}
 
 // ─── Props ─────────────────────────────────────────────────────
 
@@ -94,12 +71,15 @@ export function ChartsSection({
               tickLine={false}
               allowDecimals={false}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<ChartTooltip />} />
             <Bar
               dataKey="count"
               name="Citas"
               fill={BAR_COLOR}
               radius={[4, 4, 0, 0]}
+              animationBegin={0}
+              animationDuration={800}
+              animationEasing="ease-out"
             />
           </BarChart>
         </ResponsiveContainer>
@@ -138,7 +118,7 @@ export function ChartsSection({
                   />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<ChartTooltip />} />
             </PieChart>
           </ResponsiveContainer>
         ) : (
@@ -173,7 +153,7 @@ export function ChartsSection({
               domain={[0, 100]}
               tickFormatter={(value) => `${value}%`}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<ChartTooltip valueSuffix="%" />} />
             <Legend
               formatter={() => "Tasa de citas completadas"}
               wrapperStyle={{ fontSize: 12 }}

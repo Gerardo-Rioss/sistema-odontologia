@@ -140,22 +140,6 @@ jest.mock("@/components/ui/input", () => ({
   ),
 }));
 
-jest.mock("lucide-react", () => {
-  const Icon = () => <span data-lucide="mock" />;
-  return {
-    Search: Icon,
-    X: Icon,
-    UserPlus: Icon,
-    Plus: Icon,
-    Edit: Icon,
-    Trash2: Icon,
-    Eye: Icon,
-    Phone: Icon,
-    Mail: Icon,
-    MapPin: Icon,
-  };
-});
-
 jest.mock("@/components/ui/Table", () => ({
   Table: ({
     columns,

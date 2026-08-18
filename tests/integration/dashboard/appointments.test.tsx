@@ -246,24 +246,6 @@ jest.mock("@/components/ui/tabs", () => ({
   }) => <div data-testid={`tabs-content-${value}`} className={className}>{children}</div>,
 }));
 
-jest.mock("lucide-react", () => {
-  const Icon = () => <span data-lucide="mock" />;
-  return {
-    CalendarDays: Icon,
-    List: Icon,
-    Plus: Icon,
-    Search: Icon,
-    Filter: Icon,
-    Eye: Icon,
-    Edit: Icon,
-    Trash2: Icon,
-    Check: Icon,
-    X: Icon,
-    Clock: Icon,
-    Calendar: Icon,
-  };
-});
-
 jest.mock("@/lib/utils", () => ({
   cn: (...classes: (string | undefined | false | null)[]) =>
     classes.filter(Boolean).join(" "),

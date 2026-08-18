@@ -75,10 +75,12 @@ model User {
   appointments        Appointment[]
   passwordResetTokens PasswordResetToken[]
   calendarConnection  CalendarConnection?
+  clinicSettings      ClinicSettings?
 
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
   whatsappMessages WhatsAppMessage[]
+  attachments      Attachment[]
 
   @@map("users")
 }
@@ -102,6 +104,32 @@ model CalendarConnection {
   @@map("calendar_connections")
 }
 
+// ─── Configuración del consultorio ─────────────────────────────
+model ClinicSettings {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Datos del consultorio
+  clinicName    String?
+  address       String?
+  city          String?
+  phone         String?
+  openTime      String? // Ej: "08:00"
+  closeTime     String? // Ej: "20:00"
+  workDays      String? // Ej: "1,2,3,4,5" (1=Lunes ... 7=Domingo)
+
+  // Preferencias de notificación
+  whatsappReminders Boolean @default(true)
+  emailReminders    Boolean @default(false)
+  reminderHours     Int     @default(24) // Anticipación del recordatorio
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("clinic_settings")
+}
+
 model Patient {
   id        String   @id @default(cuid())
   name      String
@@ -116,7 +144,11 @@ model Patient {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   appointments Appointment[]
+  medicalRecord MedicalRecord?
+  attachments   Attachment[]
 
+  // Índice para filtrar pacientes por dentista
+  @@index([userId])
   @@map("patients")
 }
 
@@ -142,6 +174,10 @@ model Appointment {
   messages          Message[]
   whatsappMessages  WhatsAppMessage[]
 
+  // Índices de performance: la query más común filtra por dentista + fecha
+  @@index([userId, date])
+  @@index([patientId])
+  @@index([status])
   @@map("appointments")
 }
 
@@ -158,6 +194,8 @@ model Message {
   receiver    User          @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
   appointment Appointment?  @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
 
+  @@index([appointmentId])
+  @@index([senderId])
   @@map("messages")
 }
 
@@ -187,6 +225,8 @@ model WhatsAppMessage {
   appointment   Appointment?    @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
   createdAt     DateTime        @default(now())
 
+  @@index([phoneNumber])
+  @@index([appointmentId])
   @@map("whatsapp_messages")
 }
 
@@ -201,4 +241,49 @@ model ConversationState {
 
   @@index([phoneNumber])
   @@map("conversation_states")
+}
+
+// ─── Historia Clínica ─────────────────────────────────────────
+model MedicalRecord {
+  id        String   @id @default(cuid())
+  patientId String   @unique
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  // Antecedentes médicos
+  allergies   String? // Alergias conocidas
+  medications String? // Medicación actual
+  conditions  String? // Condiciones preexistentes (diabetes, hipertensión, etc.)
+  bloodType   String? // Grupo sanguíneo (A+, A-, B+, B-, AB+, AB-, O+, O-)
+
+  // Historia odontológica
+  dentalHistory String? // Tratamientos previos, cirugías, etc.
+  habits        String? // Hábitos (tabaquismo, alcohol, bruxismo, etc.)
+
+  // Notas del profesional
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("medical_records")
+}
+
+// ─── Archivos adjuntos ────────────────────────────────────────
+model Attachment {
+  id        String   @id @default(cuid())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  fileName  String   // Nombre original del archivo
+  fileType  String   // MIME type
+  fileSize  Int      // Tamaño en bytes
+  filePath  String   // Ruta de almacenamiento
+  category  String?  // RADIOGRAFIA | DOCUMENTO | FOTO | RECETA | OTRO
+  notes     String?  // Descripción opcional
+
+  createdAt DateTime @default(now())
+
+  @@index([patientId])
+  @@map("attachments")
 }

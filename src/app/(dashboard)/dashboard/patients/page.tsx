@@ -12,6 +12,7 @@ import { Table } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Spinner } from "@/components/ui/Spinner";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import { Search, X, UserPlus, Pencil, Trash2, UserRound } from "lucide-react";
 import { formatShortDate, formatTime, formatPhoneNumber } from "@/lib/formatters";
 import type { Patient } from "@/types";
@@ -119,13 +120,50 @@ export default function PatientsPage() {
 
   // ── Columnas de la tabla ──
 
+  // Avatar de iniciales con color estable por paciente
+  const getInitials = (name: string) =>
+    name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase() ?? "")
+      .join("");
+
+  const avatarPalette = [
+    "bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
+    "bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
+    "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
+    "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+    "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
+    "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300",
+  ];
+
+  const avatarColor = (name: string) => {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    return avatarPalette[hash % avatarPalette.length];
+  };
+
   const columns = [
     {
       key: "name",
       header: "Nombre",
       sortable: true,
       render: (row: Patient) => (
-        <span className="font-medium text-foreground">{row.name}</span>
+        <div className="flex items-center gap-3">
+          <span
+            className={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+              avatarColor(row.name)
+            )}
+            aria-hidden="true"
+          >
+            {getInitials(row.name)}
+          </span>
+          <Link href={`/dashboard/patients/${row.id}`} className="font-medium text-foreground hover:text-primary transition-colors">
+            {row.name}
+          </Link>
+        </div>
       ),
     },
     {
@@ -230,6 +268,7 @@ export default function PatientsPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
+            autoComplete="off"
             placeholder="Buscar paciente por nombre..."
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
