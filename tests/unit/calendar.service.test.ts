@@ -57,6 +57,7 @@ jest.mock("@/repositories/calendar.repository", () => ({
 jest.mock("@/repositories/appointment.repository", () => ({
   appointmentRepository: {
     findById: jest.fn(),
+    findByGoogleEventId: jest.fn(),
     findByDentist: jest.fn(),
     update: jest.fn(),
     create: jest.fn(),
@@ -124,7 +125,7 @@ function mockAppointment(overrides: Record<string, unknown> = {}) {
     patient: { id: "patient-1", name: "Juan Pérez" },
     ...overrides,
   };
-  (prisma.appointment.findUnique as jest.Mock).mockResolvedValue(appt);
+  (appointmentRepository.findById as jest.Mock).mockResolvedValue(appt);
   return appt;
 }
 
@@ -228,7 +229,7 @@ describe("CalendarService — syncToCalendar", () => {
 
   describe("syncToCalendar — error handling", () => {
     it("should return error result when appointment is not found", async () => {
-      (prisma.appointment.findUnique as jest.Mock).mockResolvedValue(null);
+      (appointmentRepository.findById as jest.Mock).mockResolvedValue(null);
 
       const result = await calendarService.syncToCalendar("nonexistent", "user-1");
 
@@ -308,7 +309,7 @@ describe("CalendarService — reconcileWebhookEvent (LWW)", () => {
     const googleUpdateTime = new Date("2026-06-15T15:00:00Z");
     const localUpdateTime = new Date("2026-06-15T14:00:00Z"); // 1 hour older
 
-    (prisma.appointment.findUnique as jest.Mock).mockResolvedValue({
+    (appointmentRepository.findByGoogleEventId as jest.Mock).mockResolvedValue({
       id: "appt-1",
       updatedAt: localUpdateTime,
       googleEventId: "google-event-abc",
@@ -337,7 +338,7 @@ describe("CalendarService — reconcileWebhookEvent (LWW)", () => {
     const googleUpdateTime = new Date("2026-06-15T14:00:00Z");
     const localUpdateTime = new Date("2026-06-15T15:00:00Z"); // 1 hour newer
 
-    (prisma.appointment.findUnique as jest.Mock).mockResolvedValue({
+    (appointmentRepository.findByGoogleEventId as jest.Mock).mockResolvedValue({
       id: "appt-1",
       updatedAt: localUpdateTime,
       googleEventId: "google-event-abc",
@@ -347,7 +348,7 @@ describe("CalendarService — reconcileWebhookEvent (LWW)", () => {
 
     // For the push-back call (syncToCalendar internal), we need the mock setup
     // syncToCalendar internally fetches appointment again — ensure it succeeds
-    (prisma.appointment.findUnique as jest.Mock)
+    (appointmentRepository.findByGoogleEventId as jest.Mock)
       .mockResolvedValueOnce({
         id: "appt-1",
         updatedAt: localUpdateTime,
@@ -386,7 +387,7 @@ describe("CalendarService — reconcileWebhookEvent (LWW)", () => {
   it("should take no action when timestamps are equal", async () => {
     const sameTime = new Date("2026-06-15T15:00:00Z");
 
-    (prisma.appointment.findUnique as jest.Mock).mockResolvedValue({
+    (appointmentRepository.findByGoogleEventId as jest.Mock).mockResolvedValue({
       id: "appt-1",
       updatedAt: sameTime,
       googleEventId: "google-event-abc",
@@ -405,7 +406,7 @@ describe("CalendarService — reconcileWebhookEvent (LWW)", () => {
   });
 
   it("should return none when no local appointment matches googleEventId", async () => {
-    (prisma.appointment.findUnique as jest.Mock).mockResolvedValue(null);
+    (appointmentRepository.findByGoogleEventId as jest.Mock).mockResolvedValue(null);
 
     const result = await calendarService.reconcileWebhookEvent(
       googleEventTemplate,

@@ -63,6 +63,47 @@ export class PatientRepository implements IRepository<Patient> {
     });
   }
 
+  /**
+   * Lista pacientes de un dentista con búsqueda por nombre en la base de datos.
+   * Mucho más eficiente que traer todos y filtrar en memoria.
+   */
+  async findByDentistWithSearch(
+    userId: string,
+    search?: string,
+    options?: {
+      skip?: number;
+      take?: number;
+    }
+  ): Promise<Patient[]> {
+    const where: Record<string, unknown> = { userId };
+
+    if (search) {
+      where.name = {
+        contains: search,
+        mode: "insensitive",
+      };
+    }
+
+    return prisma.patient.findMany({
+      where,
+      include: {
+        _count: { select: { appointments: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      skip: options?.skip,
+      take: options?.take,
+    });
+  }
+
+  /**
+   * Busca un paciente por número de teléfono.
+   */
+  async findByPhone(phone: string): Promise<Patient | null> {
+    return prisma.patient.findFirst({
+      where: { phone },
+    });
+  }
+
   async create(data: Partial<Patient>): Promise<Patient> {
     return prisma.patient.create({
       data: {

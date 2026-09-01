@@ -11,10 +11,15 @@
  * (TDD deshabilitado en este proyecto).
  */
 
-import { MapRateLimiterStore } from "@/lib/rate-limiter";
+import { MapRateLimiterStore, rateLimiter } from "@/lib/rate-limiter";
 
 describe("MapRateLimiterStore", () => {
   let store: MapRateLimiterStore;
+
+  beforeAll(() => {
+    // Stop the singleton timer to prevent open handles in test suite
+    rateLimiter.stopCleanup();
+  });
 
   beforeEach(() => {
     // Ventana de 15 min, máximo 5 solicitudes
