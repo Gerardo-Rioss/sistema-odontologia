@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { whatsappService } from "@/services/whatsapp.service";
+import { whatsappMessaging } from "@/services/whatsapp-messaging.service";
 import { conversationService } from "@/services/conversation.service";
 
 /**
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
             try {
               // Parse the message via WhatsAppService — persists inbound + returns data
               // We reconstruct the minimal payload the service expects
-              const extracted = await whatsappService.processIncomingMessage({
+              const extracted = await whatsappMessaging.processIncomingMessage({
                 object: "whatsapp_business_account",
                 entry: [
                   {
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
               });
 
               // Mark the message as read on WhatsApp (fire-and-forget)
-              whatsappService
+              whatsappMessaging
                 .markAsRead(extracted.messageId)
                 .catch((err) =>
                   console.error(

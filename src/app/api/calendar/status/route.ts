@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { withAuth } from "@/lib/api-middleware";
 import { calendarRepository } from "@/repositories/calendar.repository";
 
 /**
@@ -9,29 +9,16 @@ import { calendarRepository } from "@/repositories/calendar.repository";
  * - If connected: { connected: true, email, lastSyncedAt }
  * - If not:     { connected: false }
  */
-export async function GET() {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
+export const GET = withAuth(async (request, { session }) => {
+  const connection = await calendarRepository.findByUserId(session.user.id);
 
-    const connection = await calendarRepository.findByUserId(session.user.id);
-
-    if (!connection || connection.status !== "ACTIVE") {
-      return NextResponse.json({ connected: false });
-    }
-
-    return NextResponse.json({
-      connected: true,
-      email: connection.googleEmail ?? null,
-      lastSyncedAt: connection.lastSyncedAt?.toISOString() ?? null,
-    });
-  } catch (error) {
-    console.error("[CalendarStatus] GET error:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+  if (!connection || connection.status !== "ACTIVE") {
+    return NextResponse.json({ connected: false });
   }
-}
+
+  return NextResponse.json({
+    connected: true,
+    email: connection.googleEmail ?? null,
+    lastSyncedAt: connection.lastSyncedAt?.toISOString() ?? null,
+  });
+});

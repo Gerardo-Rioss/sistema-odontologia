@@ -57,11 +57,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       });
     }
 
-    // Dev mode: retornar token en la respuesta
-    return NextResponse.json({
+    // Dev mode: retornar token en la respuesta (solo en desarrollo)
+    const response: Record<string, unknown> = {
       message: "Token generado correctamente.",
-      resetToken: token,
-    });
+    };
+
+    if (process.env.NODE_ENV === "development") {
+      response.resetToken = token;
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Forgot password error:", error);
     return NextResponse.json(

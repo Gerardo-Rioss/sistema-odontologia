@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { whatsappService } from "@/services/whatsapp.service";
+import { NextResponse } from "next/server";
+import { withAuth } from "@/lib/api-middleware";
+import { whatsappMessaging } from "@/services/whatsapp-messaging.service";
 
 /**
  * Manual WhatsApp message sender (admin-only).
@@ -10,17 +10,8 @@ import { whatsappService } from "@/services/whatsapp.service";
  *
  * Useful for sending manual messages from the dashboard.
  */
-export async function POST(request: NextRequest) {
-  try {
-    // ── Authentication ──
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "No autorizado" },
-        { status: 401 }
-      );
-    }
-
+export const POST = withAuth(
+  async (request, { session }) => {
     // Only admins can send manual messages
     if (session.user.role !== "ADMIN") {
       return NextResponse.json(
@@ -29,7 +20,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Parse body ──
     let body: { phone?: string; text?: string };
     try {
       body = await request.json();
@@ -56,8 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Send message ──
-    const result = await whatsappService.sendMessage(phone.trim(), text.trim());
+    const result = await whatsappMessaging.sendMessage(phone.trim(), text.trim());
 
     if (!result.success) {
       return NextResponse.json(
@@ -73,11 +62,6 @@ export async function POST(request: NextRequest) {
       success: true,
       messageId: result.messageId,
     });
-  } catch (error) {
-    console.error("[WhatsApp Send] Unexpected error:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
-  }
-}
+  },
+  { roles: ["ADMIN"] }
+);

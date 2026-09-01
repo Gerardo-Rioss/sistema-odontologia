@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { whatsappService } from "@/services/whatsapp.service";
+import { NextResponse } from "next/server";
+import { withAuth } from "@/lib/api-middleware";
+import { slotService } from "@/services/slot.service";
 
 /**
  * Get available appointment slots for a given date.
@@ -11,37 +11,18 @@ import { whatsappService } from "@/services/whatsapp.service";
  * Booked slots (PENDING, CONFIRMED) are marked as unavailable.
  * CANCELLED appointments free their slot.
  */
-export async function GET(request: NextRequest) {
-  try {
-    // ── Authentication ──
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
+export const GET = withAuth(async (request, { session }) => {
+  const { searchParams } = new URL(request.url);
+  const date = searchParams.get("date");
 
-    // ── Parse query param ──
-    const { searchParams } = new URL(request.url);
-    const date = searchParams.get("date");
-
-    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return NextResponse.json(
-        { error: "Parámetro 'date' requerido (formato: YYYY-MM-DD)" },
-        { status: 400 }
-      );
-    }
-
-    // ── Get available slots ──
-    const slots = await whatsappService.getAvailableSlots(
-      date,
-      session.user.id
-    );
-
-    return NextResponse.json({ success: true, data: slots });
-  } catch (error) {
-    console.error("GET /api/appointments/available-slots error:", error);
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
+      { error: "Parámetro 'date' requerido (formato: YYYY-MM-DD)" },
+      { status: 400 }
     );
   }
-}
+
+  const slots = await slotService.getAvailableSlots(date, session.user.id);
+
+  return NextResponse.json({ success: true, data: slots });
+});

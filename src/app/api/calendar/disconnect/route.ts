@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { NextResponse } from "next/server";
+import { withAuth } from "@/lib/api-middleware";
 import { calendarRepository } from "@/repositories/calendar.repository";
 
 /**
@@ -10,25 +10,11 @@ import { calendarRepository } from "@/repositories/calendar.repository";
  * - Deletes the CalendarConnection from the database.
  * - Returns 200 on success (even if no connection existed — idempotent).
  */
-export async function POST(_request: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
-
-    // Delete by userId (idempotent — fine if none exists)
-    const connection = await calendarRepository.findByUserId(session.user.id);
-    if (connection) {
-      await calendarRepository.delete(connection.id);
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("[CalendarDisconnect] POST error:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+export const POST = withAuth(async (request, { session }) => {
+  const connection = await calendarRepository.findByUserId(session.user.id);
+  if (connection) {
+    await calendarRepository.delete(connection.id);
   }
-}
+
+  return NextResponse.json({ success: true });
+});
