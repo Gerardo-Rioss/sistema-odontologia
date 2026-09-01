@@ -139,6 +139,11 @@ jest.mock("next/link", () => ({
   }) => <a href={href}>{children}</a>,
 }));
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn(), prefetch: jest.fn() }),
+  useSearchParams: () => null,
+}));
+
 // ─── Setup / Teardown ─────────────────────────────────────────
 
 beforeEach(() => {
@@ -159,6 +164,7 @@ beforeEach(() => {
     isLoading: false,
     error: null,
   });
+
   mockUseAppointments.mockReturnValue({
     data: [],
     isLoading: false,

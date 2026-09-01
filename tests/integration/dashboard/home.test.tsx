@@ -144,15 +144,25 @@ jest.mock("next/link", () => ({
   }) => <a href={href}>{children}</a>,
 }));
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn(), prefetch: jest.fn() }),
+  useSearchParams: () => null,
+}));
+
 // ─── Helpers ──────────────────────────────────────────────────
 
 function makeAppointment(
   overrides: Partial<AppointmentListItem> = {},
 ): AppointmentListItem {
   const id = overrides.id ?? `apt-${Math.random().toString(36).slice(2, 8)}`;
+  // Fecha de MAÑANA (siempre futura) → la lógica de "próximas citas" las incluye
+  // sin importar a qué hora corra el test (antes: new Date() con time "10:00"
+  // quedaba excluida si el test corría después de las 10am).
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
   return {
     id,
-    date: new Date(),
+    date: tomorrow,
     time: "10:00",
     status: "PENDING",
     type: "REVISION" as AppointmentType,
@@ -182,7 +192,6 @@ function setupDefaultState() {
     isLoading: false,
     error: null,
   });
-
   mockUseAppointments.mockReturnValue({
     data: [
       makeAppointment({ id: "a1", patient: { id: "p1", name: "Ana Ruiz" } }),

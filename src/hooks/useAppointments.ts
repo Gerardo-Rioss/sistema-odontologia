@@ -9,6 +9,7 @@ import { useStore } from '@/store/useStore';
 export interface AppointmentFilters {
   status?: AppointmentStatus;
   date?: string;
+  search?: string;
 }
 
 // ─── Fetcher ──────────────────────────────────────────────────
@@ -19,6 +20,7 @@ async function fetchAppointments(
   const params = new URLSearchParams();
   if (filters?.status) params.set('status', filters.status);
   if (filters?.date) params.set('date', filters.date);
+  if (filters?.search) params.set('search', filters.search);
 
   const res = await fetch(`/api/appointments?${params.toString()}`);
 
@@ -37,7 +39,7 @@ async function fetchAppointments(
  * React Query hook para listar citas odontológicas con filtros opcionales.
  *
  * Si no se pasan filtros explícitos, se usan los filtros activos del store
- * de Zustand (statusFilter + dateFilter).
+ * de Zustand (statusFilter + dateFilter + searchQuery).
  *
  * staleTime: 30s — los datos se consideran frescos durante 30 segundos.
  */
@@ -45,12 +47,14 @@ export function useAppointments(filters?: AppointmentFilters) {
   const zustandFilters = useStore((s) => ({
     status: s.statusFilter,
     date: s.dateFilter,
+    search: s.searchQuery,
   }));
 
   const effectiveFilters: AppointmentFilters | undefined =
     filters ?? {
       status: zustandFilters.status ?? undefined,
       date: zustandFilters.date ?? undefined,
+      search: zustandFilters.search ?? undefined,
     };
 
   return useQuery({

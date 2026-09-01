@@ -63,5 +63,6 @@ export const Bell = MockIcon;
 export const Stethoscope = MockIcon;
 export const Save = MockIcon;
 export const CornerDownLeft = MockIcon;
+export const CalendarCheck = MockIcon;
 
 export default MockIcon;

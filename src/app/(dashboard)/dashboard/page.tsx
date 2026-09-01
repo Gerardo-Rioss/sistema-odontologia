@@ -2,9 +2,11 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useStatistics } from "@/hooks/useStatistics";
 import { useAppointments } from "@/hooks/useAppointments";
 import { useStore } from "@/store/useStore";
+import { dateKeyOf } from "@/lib/formatters";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { AppointmentList } from "@/components/dashboard/AppointmentList";
 import { Spinner } from "@/components/ui/Spinner";
@@ -17,6 +19,7 @@ import { CalendarDays, Users, CheckCircle2, AlertTriangle, Plus, UserPlus, BarCh
  * Muestra saludo, métricas clave, últimas citas y acciones rápidas.
  */
 export default function DashboardPage() {
+  const router = useRouter();
   const user = useStore((s) => s.user);
   const { overview, appointmentsByMonth, completionTrend, isLoading: statsLoading, error: statsError } = useStatistics();
   const { data: allAppointments = [], isLoading: appsLoading, error: appsError } = useAppointments();
@@ -54,25 +57,21 @@ export default function DashboardPage() {
     new Date().toLocaleDateString("es-AR", { month: "long", year: "numeric" }),
   []);
 
-  // Próximas citas: solo futuras (hoy incluido si la hora aún no pasó),
-  // ordenadas por proximidad (las más cercanas primero), máx 5.
+  // Próximas citas: TODAS las de hoy (aunque la hora ya pasó — el odontólogo
+  // quiere ver la agenda del día completa) + las futuras, ordenadas por
+  // proximidad (hoy primero por hora, después los días siguientes), máx 5.
   const recentAppointments = useMemo(() => {
     const now = new Date();
-    const todayIso = now.toISOString().slice(0, 10);
-    const nowTime = `${String(now.getHours()).padStart(2, "0")}:${String(
-      now.getMinutes()
-    ).padStart(2, "0")}`;
+    const todayIso = dateKeyOf(now);
 
     return [...allAppointments]
       .filter((a) => {
-        const dateIso = new Date(a.date).toISOString().slice(0, 10);
-        if (dateIso > todayIso) return true; // fecha futura
-        if (dateIso === todayIso) return a.time >= nowTime; // hoy: hora aún no pasó
-        return false; // fecha pasada → descartar
+        const dateIso = dateKeyOf(a.date);
+        return dateIso >= todayIso; // hoy + futuras
       })
       .sort((a, b) => {
         // Ordenar por fecha, y si es el mismo día por hora
-        const dateDiff = new Date(a.date).getTime() - new Date(b.date).getTime();
+        const dateDiff = dateKeyOf(a.date).localeCompare(dateKeyOf(b.date));
         if (dateDiff !== 0) return dateDiff;
         return a.time.localeCompare(b.time);
       })
@@ -100,7 +99,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards — clickeables, llevan a su sección */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" data-onboarding="stats">
         <StatsCard
           icon={<CalendarDays className="h-5 w-5" />}
@@ -109,6 +108,7 @@ export default function DashboardPage() {
           accent="blue"
           loading={statsLoading}
           sparkline={monthlyCounts}
+          href="/dashboard/appointments"
         />
         <StatsCard
           icon={<Users className="h-5 w-5" />}
@@ -116,6 +116,7 @@ export default function DashboardPage() {
           value={overview.totalPatients}
           accent="green"
           loading={statsLoading}
+          href="/dashboard/patients"
         />
         <StatsCard
           icon={<CheckCircle2 className="h-5 w-5" />}
@@ -124,6 +125,7 @@ export default function DashboardPage() {
           accent="purple"
           loading={statsLoading}
           sparkline={completionSeries}
+          href="/dashboard/statistics"
           trend={{
             value: overview.completionRate,
             direction: overview.completionRate >= 50 ? "up" : "down",
@@ -135,6 +137,7 @@ export default function DashboardPage() {
           value={`${overview.completionRate > 0 ? Math.round((100 - overview.completionRate) / 2) : 0}%`}
           accent="red"
           loading={statsLoading}
+          href="/dashboard/statistics"
         />
       </div>
 
@@ -162,7 +165,11 @@ export default function DashboardPage() {
                   <p className="text-sm text-destructive">{appsError.message}</p>
                 </div>
               ) : (
-                <AppointmentList appointments={recentAppointments} isLoading={false} />
+                <AppointmentList
+                  appointments={recentAppointments}
+                  isLoading={false}
+                  onSelectAppointment={(id) => router.push(`/dashboard/appointments?id=${id}`)}
+                />
               )}
             </CardContent>
           </Card>

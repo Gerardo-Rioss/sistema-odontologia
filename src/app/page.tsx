@@ -136,12 +136,12 @@ export default function Home() {
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <Smile className="h-5 w-5" />
             </span>
-            <span className="hidden sm:inline">OdontoGest</span>
+            <span className="hidden sm:inline">Sistema Odontológico</span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-            <span className="cursor-pointer transition-colors hover:text-foreground">Funciones</span>
-            <span className="cursor-pointer transition-colors hover:text-foreground">Cómo funciona</span>
-            <span className="cursor-pointer transition-colors hover:text-foreground">Stack</span>
+            <a href="#features" className="transition-colors hover:text-foreground">Funciones</a>
+            <a href="#como-funciona" className="transition-colors hover:text-foreground">Cómo funciona</a>
+            <a href="#stack" className="transition-colors hover:text-foreground">Stack</a>
           </nav>
           <div className="flex items-center gap-2">
             <Link
@@ -199,7 +199,7 @@ export default function Home() {
         </div>
 
         {/* ── Funciones ── */}
-        <section id="features" className="mt-20 sm:mt-28">
+        <section id="features" className="mt-20 scroll-mt-16 sm:mt-28">
           <div className="text-center">
             <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
               Todo lo que tu consultorio necesita
@@ -226,8 +226,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Por qué elegirlo ── */}
-        <section className="mt-20 sm:mt-28">
+        {/* ── Cómo funciona ── */}
+        <section id="como-funciona" className="mt-20 scroll-mt-16 sm:mt-28">
           <div className="rounded-2xl border bg-card p-8 shadow-sm sm:p-12">
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
@@ -248,6 +248,41 @@ export default function Home() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* ── Stack tecnológico ── */}
+        <section id="stack" className="mt-20 scroll-mt-16 sm:mt-28">
+          <div className="text-center">
+            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+              Stack tecnológico
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Construido con las mejores herramientas del ecosistema web moderno.
+            </p>
+          </div>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            {[
+              "Next.js 14",
+              "React 18",
+              "TypeScript",
+              "Tailwind CSS",
+              "Prisma",
+              "PostgreSQL",
+              "NextAuth.js",
+              "React Query",
+              "Zustand",
+              "Zod",
+              "Framer Motion",
+              "Recharts",
+            ].map((tech) => (
+              <span
+                key={tech}
+                className="rounded-full border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+              >
+                {tech}
+              </span>
+            ))}
           </div>
         </section>
 
@@ -276,7 +311,7 @@ export default function Home() {
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Smile className="h-4 w-4" />
             </span>
-            OdontoGest
+            Sistema Odontológico
           </div>
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Sistema de Gestión Odontológica · Next.js + TypeScript

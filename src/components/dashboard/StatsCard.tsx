@@ -1,6 +1,7 @@
 "use client";
 
 import React, { type ReactNode } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -20,6 +21,8 @@ interface StatsCardProps {
   };
   /** Serie numérica opcional para mini-sparkline (último valor a la derecha). */
   sparkline?: number[];
+  /** Si se pasa, la tarjeta se convierte en link a esa ruta. */
+  href?: string;
   loading?: boolean;
   error?: string;
   className?: string;
@@ -108,6 +111,7 @@ export const StatsCard = React.memo(function StatsCard({
   accent = "blue",
   trend,
   sparkline,
+  href,
   loading = false,
   error,
   className,
@@ -124,10 +128,11 @@ export const StatsCard = React.memo(function StatsCard({
     );
   }
 
-  return (
+  const card = (
     <Card
       className={cn(
-        "relative overflow-hidden border-l-4 p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg",
+        "group relative overflow-hidden border-l-4 p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg",
+        href && "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         styles.border,
         className
       )}
@@ -138,7 +143,7 @@ export const StatsCard = React.memo(function StatsCard({
       <div className="relative flex items-start justify-between">
         <div
           className={cn(
-            "flex h-11 w-11 items-center justify-center rounded-xl shadow-sm",
+            "flex h-11 w-11 items-center justify-center rounded-xl shadow-sm transition-transform group-hover:scale-105",
             styles.icon
           )}
         >
@@ -189,6 +194,26 @@ export const StatsCard = React.memo(function StatsCard({
           </div>
         )}
       </div>
+
+      {/* Indicador de navegación */}
+      {href && (
+        <span
+          className="absolute right-3 top-3 text-muted-foreground/0 transition-colors group-hover:text-primary"
+          aria-hidden="true"
+        >
+          →
+        </span>
+      )}
     </Card>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block">
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 });

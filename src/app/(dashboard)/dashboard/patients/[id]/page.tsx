@@ -8,7 +8,7 @@ import {
   ArrowLeft, Upload, Trash2, FileText, ImageIcon, File, Loader2,
   User, Stethoscope, Paperclip, Phone, Mail, Calendar, FileEdit,
   AlertCircle, Pill, Heart, Droplets, Activity, MessageSquare,
-  Save, CheckCircle2, X, Syringe, Bone
+  Save, CheckCircle2, Bone
 } from "lucide-react";
 
 import { usePatient } from "@/hooks/usePatient";
@@ -19,7 +19,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
