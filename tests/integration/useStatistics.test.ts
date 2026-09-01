@@ -1,70 +1,69 @@
 /**
- * Tests unitarios para useStatistics hook.
+ * Tests for useStatistics hook (server-side fetch version).
  *
- * Verifica:
- *  - Cómputo de overview (total, today, patients, completionRate)
- *  - appointmentsByMonth (últimos 12 meses)
- *  - byType (distribución por tipo de cita)
- *  - byStatus (distribución por estado)
- *  - completionTrend (tasa mensual de completadas)
- *  - cancellationRate (tasa de cancelación)
- *  - newVsReturning (nuevos vs recurrentes)
- *  - Estados de carga y error
+ * Verifies:
+ *  - Fetches from /api/statistics/overview via useQuery
+ *  - Returns StatisticsReturn shape on success
+ *  - Returns isLoading: true during fetch
+ *  - Returns error state on fetch failure
+ *  - No useAppointments / usePatients calls inside hook
  *
- * Mockea useAppointments y usePatients.
+ * Mocks fetch and useQuery.
  * @jest-environment jsdom
  */
 
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { useStatistics } from "@/hooks/useStatistics";
-import type { AppointmentListItem, AppointmentType, Patient } from "@/types";
+import type { ApiResponse } from "@/types";
 
 // ─── Mocks ────────────────────────────────────────────────────
 
-const mockUseAppointments = jest.fn();
-const mockUsePatients = jest.fn();
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
 
-jest.mock("@/hooks/useAppointments", () => ({
-  useAppointments: (...args: unknown[]) => mockUseAppointments(...args),
-}));
+// Mock React Query — we need a QueryClient provider wrapper
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createElement, type ReactNode } from "react";
 
-jest.mock("@/hooks/usePatients", () => ({
-  usePatients: (...args: unknown[]) => mockUsePatients(...args),
-}));
-
-// ─── Helpers ──────────────────────────────────────────────────
-
-function makeAppointment(
-  overrides: Partial<AppointmentListItem> = {},
-): AppointmentListItem {
-  const id = overrides.id ?? `apt-${Math.random().toString(36).slice(2, 8)}`;
-  return {
-    id,
-    date: new Date(),
-    time: "10:00",
-    status: "PENDING",
-    type: "REVISION" as AppointmentType,
-    notes: null,
-    patientId: "p1",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    patient: { id: "p1", name: "Paciente" },
-    ...overrides,
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false, gcTime: 0 },
+    },
+  });
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return createElement(QueryClientProvider, { client: queryClient }, children);
   };
 }
 
-function makePatient(overrides: Partial<Patient> = {}): Patient {
+// ─── Helpers ──────────────────────────────────────────────────
+
+function makeStatisticsResponse(overrides: Record<string, unknown> = {}): ApiResponse {
   return {
-    id: "p1",
-    name: "Paciente Uno",
-    email: null,
-    phone: "555-0100",
-    birthDate: null,
-    notes: null,
-    userId: "u1",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...overrides,
+    success: true,
+    data: {
+      overview: {
+        totalAppointments: 10,
+        totalPatients: 5,
+        appointmentsToday: 2,
+        completionRate: 70,
+      },
+      appointmentsByMonth: [
+        { month: "ene. 2026", count: 3 },
+        { month: "feb. 2026", count: 2 },
+      ],
+      byType: [{ type: "Limpieza", count: 5 }],
+      byStatus: [{ status: "Completada", count: 7 }],
+      completionTrend: [
+        { month: "ene. 2026", rate: 67 },
+        { month: "feb. 2026", rate: 50 },
+      ],
+      cancellationRate: 20,
+      newVsReturning: { newPatients: 3, returningPatients: 2 },
+      isLoading: false,
+      error: null,
+      ...overrides,
+    },
   };
 }
 
@@ -72,354 +71,114 @@ function makePatient(overrides: Partial<Patient> = {}): Patient {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockUseAppointments.mockReturnValue({
-    data: [],
-    isLoading: false,
-    error: null,
-  });
-  mockUsePatients.mockReturnValue({
-    data: [],
-    isLoading: false,
-    error: null,
-  });
 });
 
-// ─── Tests: Overview ──────────────────────────────────────────
+// ─── Tests ────────────────────────────────────────────────────
 
-describe("useStatistics — overview", () => {
-  it("debe computar totalAppointments del período (últimos 12 meses)", () => {
-    const recentDate = new Date();
-    mockUseAppointments.mockReturnValue({
-      data: [
-        makeAppointment({ id: "a1", date: recentDate }),
-        makeAppointment({ id: "a2", date: recentDate }),
-        makeAppointment({ id: "a3", date: recentDate, status: "COMPLETED" }),
-      ],
-      isLoading: false,
-      error: null,
-    });
-    mockUsePatients.mockReturnValue({
-      data: [makePatient(), makePatient()],
-      isLoading: false,
-      error: null,
+describe("useStatistics — fetch from API", () => {
+  it("should return StatisticsReturn shape on success", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(makeStatisticsResponse()),
     });
 
-    const { result } = renderHook(() => useStatistics());
-    const { overview } = result.current;
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useStatistics(), { wrapper });
 
-    expect(overview.totalAppointments).toBe(3);
-    expect(overview.totalPatients).toBe(2);
-    expect(overview.appointmentsToday).toBe(3);
-    expect(overview.completionRate).toBe(33);
-  });
-
-  it("debe devolver completionRate 0 cuando no hay citas", () => {
-    const { result } = renderHook(() => useStatistics());
-    const { overview } = result.current;
-
-    expect(overview.totalAppointments).toBe(0);
-    expect(overview.completionRate).toBe(0);
-  });
-
-  it("debe filtrar citas anteriores a 12 meses", () => {
-    const oldDate = new Date();
-    oldDate.setFullYear(oldDate.getFullYear() - 2);
-    const recentDate = new Date();
-
-    mockUseAppointments.mockReturnValue({
-      data: [
-        makeAppointment({ id: "old", date: oldDate }),
-        makeAppointment({ id: "recent", date: recentDate }),
-      ],
-      isLoading: false,
-      error: null,
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
     });
 
-    const { result } = renderHook(() => useStatistics());
-    const { overview } = result.current;
-
-    expect(overview.totalAppointments).toBe(1);
+    expect(result.current.overview.totalAppointments).toBe(10);
+    expect(result.current.overview.totalPatients).toBe(5);
+    expect(result.current.overview.appointmentsToday).toBe(2);
+    expect(result.current.overview.completionRate).toBe(70);
+    expect(result.current.byType).toHaveLength(1);
+    expect(result.current.byType[0].type).toBe("Limpieza");
+    expect(result.current.byStatus[0].status).toBe("Completada");
+    expect(result.current.cancellationRate).toBe(20);
+    expect(result.current.newVsReturning.newPatients).toBe(3);
+    expect(result.current.newVsReturning.returningPatients).toBe(2);
   });
-});
 
-// ─── Tests: appointmentsByMonth ───────────────────────────────
-
-describe("useStatistics — appointmentsByMonth", () => {
-  it("debe devolver 12 meses con conteos correctos", () => {
-    const now = new Date();
-    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 15);
-
-    mockUseAppointments.mockReturnValue({
-      data: [
-        makeAppointment({ id: "a1", date: thisMonth }),
-        makeAppointment({ id: "a2", date: thisMonth }),
-        makeAppointment({ id: "a3", date: thisMonth }),
-      ],
-      isLoading: false,
-      error: null,
+  it("should call /api/statistics/overview endpoint", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(makeStatisticsResponse()),
     });
 
-    const { result } = renderHook(() => useStatistics());
-    const { appointmentsByMonth } = result.current;
+    const wrapper = createWrapper();
+    renderHook(() => useStatistics(), { wrapper });
 
-    expect(appointmentsByMonth).toHaveLength(12);
-    const currentMonthData = appointmentsByMonth[11];
-    expect(currentMonthData.count).toBe(3);
-  });
-
-  it("debe devolver conteo 0 para meses sin citas", () => {
-    const { result } = renderHook(() => useStatistics());
-    const { appointmentsByMonth } = result.current;
-
-    appointmentsByMonth.forEach((m) => {
-      expect(m.count).toBe(0);
-    });
-    expect(appointmentsByMonth).toHaveLength(12);
-  });
-});
-
-// ─── Tests: byType ────────────────────────────────────────────
-
-describe("useStatistics — byType", () => {
-  it("debe agrupar citas por tipo con etiquetas en español", () => {
-    mockUseAppointments.mockReturnValue({
-      data: [
-        makeAppointment({ id: "a1", type: "LIMPIEZA" as AppointmentType }),
-        makeAppointment({ id: "a2", type: "LIMPIEZA" as AppointmentType }),
-        makeAppointment({ id: "a3", type: "URGENCIA" as AppointmentType }),
-      ],
-      isLoading: false,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useStatistics());
-    const { byType } = result.current;
-
-    const limpieza = byType.find((t) => t.type === "Limpieza");
-    const urgencia = byType.find((t) => t.type === "Urgencia");
-
-    expect(limpieza).toBeDefined();
-    expect(limpieza!.count).toBe(2);
-    expect(urgencia).toBeDefined();
-    expect(urgencia!.count).toBe(1);
-  });
-
-  it("debe devolver array vacío sin citas", () => {
-    const { result } = renderHook(() => useStatistics());
-    const { byType } = result.current;
-
-    expect(byType).toHaveLength(0);
-  });
-});
-
-// ─── Tests: byStatus ──────────────────────────────────────────
-
-describe("useStatistics — byStatus", () => {
-  it("debe agrupar citas por estado con etiquetas en español", () => {
-    mockUseAppointments.mockReturnValue({
-      data: [
-        makeAppointment({ id: "a1", status: "PENDING" }),
-        makeAppointment({ id: "a2", status: "COMPLETED" }),
-        makeAppointment({ id: "a3", status: "COMPLETED" }),
-        makeAppointment({ id: "a4", status: "CANCELLED" }),
-      ],
-      isLoading: false,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useStatistics());
-    const { byStatus } = result.current;
-
-    const pendiente = byStatus.find((s) => s.status === "Pendiente");
-    const completada = byStatus.find((s) => s.status === "Completada");
-    const cancelada = byStatus.find((s) => s.status === "Cancelada");
-
-    expect(pendiente).toBeDefined();
-    expect(pendiente!.count).toBe(1);
-    expect(completada).toBeDefined();
-    expect(completada!.count).toBe(2);
-    expect(cancelada).toBeDefined();
-    expect(cancelada!.count).toBe(1);
-  });
-});
-
-// ─── Tests: completionTrend ───────────────────────────────────
-
-describe("useStatistics — completionTrend", () => {
-  it("debe devolver tasa de completadas por mes", () => {
-    const now = new Date();
-    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 10);
-
-    mockUseAppointments.mockReturnValue({
-      data: [
-        makeAppointment({ id: "a1", date: thisMonth, status: "COMPLETED" }),
-        makeAppointment({ id: "a2", date: thisMonth, status: "COMPLETED" }),
-        makeAppointment({ id: "a3", date: thisMonth, status: "PENDING" }),
-        makeAppointment({ id: "a4", date: thisMonth, status: "CANCELLED" }),
-      ],
-      isLoading: false,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useStatistics());
-    const { completionTrend } = result.current;
-
-    expect(completionTrend).toHaveLength(12);
-    const currentMonth = completionTrend[11];
-    expect(currentMonth.rate).toBe(50);
-  });
-
-  it("debe devolver rate 0 para meses sin citas", () => {
-    const { result } = renderHook(() => useStatistics());
-    const { completionTrend } = result.current;
-
-    completionTrend.forEach((p) => {
-      expect(p.rate).toBe(0);
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith("/api/statistics/overview");
     });
   });
-});
 
-// ─── Tests: cancellationRate ──────────────────────────────────
+  it("should return isLoading: true during fetch", () => {
+    mockFetch.mockReturnValue(new Promise(() => {})); // Never resolves
 
-describe("useStatistics — cancellationRate", () => {
-  it("debe calcular el porcentaje de canceladas", () => {
-    mockUseAppointments.mockReturnValue({
-      data: [
-        makeAppointment({ id: "a1", status: "CANCELLED" }),
-        makeAppointment({ id: "a2", status: "CANCELLED" }),
-        makeAppointment({ id: "a3", status: "COMPLETED" }),
-        makeAppointment({ id: "a4", status: "COMPLETED" }),
-        makeAppointment({ id: "a5", status: "COMPLETED" }),
-        makeAppointment({ id: "a6", status: "PENDING" }),
-      ],
-      isLoading: false,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useStatistics());
-
-    expect(result.current.cancellationRate).toBe(33);
-  });
-
-  it("debe devolver 0 cuando no hay citas", () => {
-    const { result } = renderHook(() => useStatistics());
-
-    expect(result.current.cancellationRate).toBe(0);
-  });
-});
-
-// ─── Tests: newVsReturning ────────────────────────────────────
-
-describe("useStatistics — newVsReturning", () => {
-  it("debe clasificar pacientes con 1 cita como nuevos", () => {
-    mockUseAppointments.mockReturnValue({
-      data: [
-        makeAppointment({ id: "a1", patientId: "p-new" }),
-        makeAppointment({ id: "a2", patientId: "p-ret", status: "COMPLETED" }),
-        makeAppointment({ id: "a3", patientId: "p-ret", status: "PENDING" }),
-      ],
-      isLoading: false,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useStatistics());
-    const { newVsReturning } = result.current;
-
-    expect(newVsReturning.newPatients).toBe(1);
-    expect(newVsReturning.returningPatients).toBe(1);
-  });
-
-  it("debe devolver ceros cuando no hay citas", () => {
-    const { result } = renderHook(() => useStatistics());
-    const { newVsReturning } = result.current;
-
-    expect(newVsReturning.newPatients).toBe(0);
-    expect(newVsReturning.returningPatients).toBe(0);
-  });
-
-  it("debe considerar todos como recurrentes si todos tienen ≥2 citas", () => {
-    mockUseAppointments.mockReturnValue({
-      data: [
-        makeAppointment({ id: "a1", patientId: "p1" }),
-        makeAppointment({ id: "a2", patientId: "p1" }),
-        makeAppointment({ id: "a3", patientId: "p2" }),
-        makeAppointment({ id: "a4", patientId: "p2" }),
-      ],
-      isLoading: false,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useStatistics());
-    const { newVsReturning } = result.current;
-
-    expect(newVsReturning.newPatients).toBe(0);
-    expect(newVsReturning.returningPatients).toBe(2);
-  });
-});
-
-// ─── Tests: Estados de carga y error ──────────────────────────
-
-describe("useStatistics — estados", () => {
-  it("isLoading debe ser true si appointments está cargando", () => {
-    mockUseAppointments.mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      error: null,
-    });
-    mockUsePatients.mockReturnValue({
-      data: [],
-      isLoading: false,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useStatistics());
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useStatistics(), { wrapper });
 
     expect(result.current.isLoading).toBe(true);
   });
 
-  it("isLoading debe ser true si patients está cargando", () => {
-    mockUseAppointments.mockReturnValue({
-      data: [],
-      isLoading: false,
-      error: null,
-    });
-    mockUsePatients.mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      error: null,
+  it("should return error state on fetch failure", async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      json: () => Promise.resolve({ error: "Error de servidor" }),
     });
 
-    const { result } = renderHook(() => useStatistics());
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useStatistics(), { wrapper });
 
-    expect(result.current.isLoading).toBe(true);
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.error).toBe("Error de servidor");
+    expect(result.current.overview.totalAppointments).toBe(0);
   });
 
-  it("debe propagar error de appointments", () => {
-    mockUseAppointments.mockReturnValue({
-      data: [],
-      isLoading: false,
-      error: new Error("Error de API"),
+  it("should return default error message when body has no error field", async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      json: () => Promise.resolve({}),
     });
 
-    const { result } = renderHook(() => useStatistics());
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useStatistics(), { wrapper });
 
-    expect(result.current.error).toBe("Error de API");
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.error).toBe("Error al cargar estadísticas");
   });
 
-  it("debe propagar error de patients si appointments no tiene error", () => {
-    mockUseAppointments.mockReturnValue({
-      data: [],
-      isLoading: false,
-      error: null,
-    });
-    mockUsePatients.mockReturnValue({
-      data: [],
-      isLoading: false,
-      error: new Error("Error de pacientes"),
+  it("should include all StatisticsReturn fields", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(makeStatisticsResponse()),
     });
 
-    const { result } = renderHook(() => useStatistics());
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useStatistics(), { wrapper });
 
-    expect(result.current.error).toBe("Error de pacientes");
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Verify all required fields exist
+    expect(result.current).toHaveProperty("overview");
+    expect(result.current).toHaveProperty("appointmentsByMonth");
+    expect(result.current).toHaveProperty("byType");
+    expect(result.current).toHaveProperty("byStatus");
+    expect(result.current).toHaveProperty("completionTrend");
+    expect(result.current).toHaveProperty("cancellationRate");
+    expect(result.current).toHaveProperty("newVsReturning");
+    expect(result.current).toHaveProperty("isLoading");
+    expect(result.current).toHaveProperty("error");
   });
 });

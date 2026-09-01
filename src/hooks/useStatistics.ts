@@ -1,12 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
-import { format, subMonths, isBefore } from 'date-fns';
-import { es } from 'date-fns/locale';
-
-import { useAppointments } from '@/hooks/useAppointments';
-import { usePatients } from '@/hooks/usePatients';
-import type { AppointmentStatus, AppointmentType } from '@/types';
+import { useQuery } from '@tanstack/react-query';
+import type { ApiResponse } from '@/types';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -63,172 +58,90 @@ interface StatisticsReturn {
   error: string | null;
 }
 
-// ─── Labels ───────────────────────────────────────────────────
+// ─── Fetcher ──────────────────────────────────────────────────
 
-const TYPE_LABELS: Record<AppointmentType, string> = {
-  LIMPIEZA: 'Limpieza',
-  REVISION: 'Revisión',
-  URGENCIA: 'Urgencia',
-  TRATAMIENTO: 'Tratamiento',
-  OTRO: 'Otro',
-};
+async function fetchStatistics(): Promise<StatisticsReturn> {
+  const res = await fetch('/api/statistics/overview');
 
-const STATUS_LABELS: Record<AppointmentStatus, string> = {
-  PENDING: 'Pendiente',
-  CONFIRMED: 'Confirmada',
-  CANCELLED: 'Cancelada',
-  COMPLETED: 'Completada',
-};
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || 'Error al cargar estadísticas');
+  }
+
+  const json: ApiResponse<StatisticsReturn> = await res.json();
+  // Server returns { success, data } where data has isLoading/error from the service
+  // Strip those server-side fields and add client-side loading state
+  const data = json.data!;
+  return {
+    overview: data.overview,
+    appointmentsByMonth: data.appointmentsByMonth,
+    byType: data.byType,
+    byStatus: data.byStatus,
+    completionTrend: data.completionTrend,
+    cancellationRate: data.cancellationRate,
+    newVsReturning: data.newVsReturning,
+    isLoading: false,
+    error: null,
+  };
+}
 
 // ─── Hook ─────────────────────────────────────────────────────
 
 /**
- * Hook de estadísticas — computa métricas del dashboard cliente-side
- * a partir de los datos crudos de citas y pacientes.
+ * Hook de estadísticas — fetches metrics from server-side API endpoint.
  *
- * Todos los cálculos están memoizados con useMemo. El período de análisis
- * son los últimos 12 meses a partir de hoy.
+ * Replaces client-side computation (9 useMemo + full data fetch) with a
+ * single server-side aggregation. Same StatisticsReturn interface for
+ * backward compatibility with dashboard consumers.
+ *
+ * staleTime: 30s — datos frescos durante 30 segundos.
  */
 export function useStatistics(): StatisticsReturn {
-  const {
-    data: appointments = [],
-    isLoading: appointmentsLoading,
-    error: appointmentsError,
-  } = useAppointments();
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['statistics-overview'],
+    queryFn: fetchStatistics,
+    staleTime: 30_000,
+    // Provide default empty shape while loading
+    placeholderData: (prev) => prev,
+  });
 
-  const {
-    data: patients = [],
-    isLoading: patientsLoading,
-    error: patientsError,
-  } = usePatients();
-
-  const isLoading = appointmentsLoading || patientsLoading;
-  const error =
-    appointmentsError?.message ?? patientsError?.message ?? null;
-
-  // ── Fecha de corte: 12 meses atrás ──
-  const cutoffDate = useMemo(() => subMonths(new Date(), 12), []);
-
-  // ── Filtrar citas de los últimos 12 meses ──
-  const recentAppointments = useMemo(
-    () =>
-      appointments.filter((a) => {
-        const d = new Date(a.date);
-        return !isBefore(d, cutoffDate);
-      }),
-    [appointments, cutoffDate],
-  );
-
-  // ── Overview ──
-  const overview = useMemo<StatsOverview>(() => {
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const todayCount = appointments.filter(
-      (a) => format(new Date(a.date), 'yyyy-MM-dd') === today,
-    ).length;
-
-    const total = recentAppointments.length;
-    const completed = recentAppointments.filter(
-      (a) => a.status === 'COMPLETED',
-    ).length;
-
+  if (isLoading) {
     return {
-      totalAppointments: total,
-      totalPatients: patients.length,
-      appointmentsToday: todayCount,
-      completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
+      overview: { totalAppointments: 0, totalPatients: 0, appointmentsToday: 0, completionRate: 0 },
+      appointmentsByMonth: [],
+      byType: [],
+      byStatus: [],
+      completionTrend: [],
+      cancellationRate: 0,
+      newVsReturning: { newPatients: 0, returningPatients: 0 },
+      isLoading: true,
+      error: null,
     };
-  }, [recentAppointments, patients, appointments]);
+  }
 
-  // ── appointmentsByMonth ──
-  const appointmentsByMonth = useMemo<MonthlyData[]>(() => {
-    const months: MonthlyData[] = [];
-    for (let i = 11; i >= 0; i--) {
-      const date = subMonths(new Date(), i);
-      const key = format(date, 'yyyy-MM');
-      const label = format(date, 'MMM yyyy', { locale: es });
-      const count = recentAppointments.filter(
-        (a) => format(new Date(a.date), 'yyyy-MM') === key,
-      ).length;
-      months.push({ month: label, count });
-    }
-    return months;
-  }, [recentAppointments]);
+  if (error) {
+    return {
+      overview: { totalAppointments: 0, totalPatients: 0, appointmentsToday: 0, completionRate: 0 },
+      appointmentsByMonth: [],
+      byType: [],
+      byStatus: [],
+      completionTrend: [],
+      cancellationRate: 0,
+      newVsReturning: { newPatients: 0, returningPatients: 0 },
+      isLoading: false,
+      error: error.message,
+    };
+  }
 
-  // ── byType ──
-  const byType = useMemo<TypeData[]>(() => {
-    const counts: Record<string, number> = {};
-    for (const a of recentAppointments) {
-      const label = TYPE_LABELS[a.type];
-      counts[label] = (counts[label] ?? 0) + 1;
-    }
-    return Object.entries(counts).map(([type, count]) => ({ type, count }));
-  }, [recentAppointments]);
-
-  // ── byStatus ──
-  const byStatus = useMemo<StatusData[]>(() => {
-    const counts: Record<string, number> = {};
-    for (const a of recentAppointments) {
-      const label = STATUS_LABELS[a.status];
-      counts[label] = (counts[label] ?? 0) + 1;
-    }
-    return Object.entries(counts).map(([status, count]) => ({
-      status,
-      count,
-    }));
-  }, [recentAppointments]);
-
-  // ── completionTrend ──
-  const completionTrend = useMemo<CompletionTrendPoint[]>(() => {
-    const points: CompletionTrendPoint[] = [];
-    for (let i = 11; i >= 0; i--) {
-      const date = subMonths(new Date(), i);
-      const key = format(date, 'yyyy-MM');
-      const label = format(date, 'MMM yyyy', { locale: es });
-      const monthApps = recentAppointments.filter(
-        (a) => format(new Date(a.date), 'yyyy-MM') === key,
-      );
-      const completed = monthApps.filter((a) => a.status === 'COMPLETED').length;
-      points.push({
-        month: label,
-        rate: monthApps.length > 0 ? Math.round((completed / monthApps.length) * 100) : 0,
-      });
-    }
-    return points;
-  }, [recentAppointments]);
-
-  // ── cancellationRate ──
-  const cancellationRate = useMemo(() => {
-    const total = recentAppointments.length;
-    const cancelled = recentAppointments.filter(
-      (a) => a.status === 'CANCELLED',
-    ).length;
-    return total > 0 ? Math.round((cancelled / total) * 100) : 0;
-  }, [recentAppointments]);
-
-  // ── newVsReturning ──
-  const newVsReturning = useMemo(() => {
-    const patientAppointmentCounts: Record<string, number> = {};
-    for (const a of recentAppointments) {
-      patientAppointmentCounts[a.patientId] =
-        (patientAppointmentCounts[a.patientId] ?? 0) + 1;
-    }
-    const newPatients = Object.values(patientAppointmentCounts).filter(
-      (c) => c === 1,
-    ).length;
-    const returningPatients =
-      Object.keys(patientAppointmentCounts).length - newPatients;
-    return { newPatients, returningPatients };
-  }, [recentAppointments]);
-
-  return {
-    overview,
-    appointmentsByMonth,
-    byType,
-    byStatus,
-    completionTrend,
-    cancellationRate,
-    newVsReturning,
-    isLoading,
-    error,
+  return data ?? {
+    overview: { totalAppointments: 0, totalPatients: 0, appointmentsToday: 0, completionRate: 0 },
+    appointmentsByMonth: [],
+    byType: [],
+    byStatus: [],
+    completionTrend: [],
+    cancellationRate: 0,
+    newVsReturning: { newPatients: 0, returningPatients: 0 },
+    isLoading: false,
+    error: null,
   };
 }
