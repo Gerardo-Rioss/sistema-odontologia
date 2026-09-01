@@ -8,7 +8,11 @@
  * en vez de 18/08. Por eso parseamos la parte YYYY-MM-DD manualmente (date-only).
  */
 
-/** Extrae solo la parte de fecha (YYYY-MM-DD) sin timezone. */
+/**
+ * Extrae solo la parte de fecha (YYYY-MM-DD) sin timezone.
+ * PostgreSQL guarda fechas de calendario como medianoche UTC ("2026-08-18T00:00:00.000Z");
+ * en zonas negativas (Argentina GMT-3) new Date() + format las desplaza al día anterior.
+ */
 function toDateOnly(date: Date | string): Date {
   if (typeof date === "string") {
     const match = date.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -17,6 +21,15 @@ function toDateOnly(date: Date | string): Date {
     }
   }
   return new Date(date);
+}
+
+/** Devuelve la clave YYYY-MM-DD de una fecha, sin desvío de zona horaria. */
+export function dateKeyOf(date: Date | string): string {
+  const d = toDateOnly(date);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 /**

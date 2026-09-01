@@ -1,6 +1,8 @@
 import type { Patient } from "@prisma/client";
 import { patientRepository } from "@/repositories/patient.repository";
 import type { CreatePatientDTO, UpdatePatientDTO } from "@/lib/validations";
+import { verifyOwnership } from "@/lib/ownership";
+import type { IPatientRepository } from "./types";
 
 /**
  * Servicio de gestión de pacientes odontológicos.
@@ -11,6 +13,8 @@ import type { CreatePatientDTO, UpdatePatientDTO } from "@/lib/validations";
  * cascado de citas asociadas vía onDelete: Cascade.
  */
 export class PatientService {
+  constructor(private readonly patientRepo: IPatientRepository) {}
+
   // ─── Crear paciente ───────────────────────────────────────
 
   /**
@@ -20,7 +24,7 @@ export class PatientService {
     data: CreatePatientDTO,
     userId: string
   ): Promise<Patient> {
-    return patientRepository.create({
+    return this.patientRepo.create({
       name: data.name,
       phone: data.phone,
       email: data.email || null,
@@ -56,7 +60,7 @@ export class PatientService {
     }
     if (data.notes !== undefined) updateData.notes = data.notes;
 
-    return patientRepository.update(id, updateData);
+    return this.patientRepo.update(id, updateData);
   }
 
   // ─── Listar pacientes ─────────────────────────────────────
@@ -65,21 +69,14 @@ export class PatientService {
    * Obtiene todos los pacientes del dentista con el conteo de citas.
    *
    * @param search — texto opcional para filtrar por nombre (búsqueda parcial, case-insensitive)
+   *
+   * La búsqueda se realiza en la base de datos para mejor rendimiento.
    */
   async getAll(
     userId: string,
     search?: string
   ): Promise<Patient[]> {
-    let patients = await patientRepository.findByDentist(userId);
-
-    if (search) {
-      const query = search.toLowerCase();
-      patients = patients.filter((p) =>
-        p.name.toLowerCase().includes(query)
-      );
-    }
-
-    return patients;
+    return this.patientRepo.findByDentistWithSearch(userId, search);
   }
 
   // ─── Obtener paciente por ID ──────────────────────────────
@@ -97,7 +94,7 @@ export class PatientService {
     await this.verifyPatientOwnership(id, userId);
 
     // Obtener con citas incluidas (ya verificado el ownership)
-    return patientRepository.findByIdWithAppointments(id, userId);
+    return this.patientRepo.findByIdWithAppointments(id, userId);
   }
 
   // ─── Eliminar paciente ────────────────────────────────────
@@ -112,7 +109,7 @@ export class PatientService {
    */
   async delete(id: string, userId: string): Promise<void> {
     await this.verifyPatientOwnership(id, userId);
-    await patientRepository.delete(id);
+    await this.patientRepo.delete(id);
   }
 
   // ─── Verificación de propiedad (helper compartido) ────────
@@ -130,21 +127,49 @@ export class PatientService {
     id: string,
     userId: string
   ): Promise<Patient> {
-    const patient = await patientRepository.findById(id);
+    return verifyOwnership(
+      this.patientRepo.findById.bind(this.patientRepo),
+      id,
+      userId,
+      "Paciente no encontrado",
+      "No tiene permiso para acceder a este paciente"
+    );
+  }
 
-    if (!patient) {
-      throw new Error("Paciente no encontrado");
+  // ─── Búsqueda por teléfono (WhatsApp bot) ───────────────
+
+  /**
+   * Busca un paciente por número de teléfono. Si no existe, lo crea
+   * automáticamente con el teléfono como nombre placeholder.
+   *
+   * Usado por el bot de WhatsApp para auto-crear pacientes que interactúan
+   * por primera vez.
+   *
+   * @throws {Error} "DENTIST_USER_ID is not configured" si falta la variable de entorno
+   */
+  async getPatientByPhone(phoneNumber: string): Promise<Patient> {
+    const dentistUserId = process.env.DENTIST_USER_ID;
+    if (!dentistUserId) {
+      throw new Error("DENTIST_USER_ID is not configured");
     }
 
-    if (patient.userId !== userId) {
-      throw new Error(
-        "No tiene permiso para acceder a este paciente"
-      );
+    const existing = await this.patientRepo.findByPhone(phoneNumber);
+    if (existing) {
+      return existing;
     }
 
-    return patient;
+    return this.patientRepo.create({
+      name: phoneNumber,
+      phone: phoneNumber,
+      userId: dentistUserId,
+    });
   }
 }
 
+/** Creates a PatientService wired to the real repository. */
+export function createPatientService(): PatientService {
+  return new PatientService(patientRepository);
+}
+
 /** Instancia singleton del servicio de pacientes. */
-export const patientService = new PatientService();
+export const patientService = createPatientService();

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { calendarRepository } from "@/repositories/calendar.repository";
 import { appointmentRepository } from "@/repositories/appointment.repository";
 import type { SyncResult, GoogleCalendarEvent } from "@/types/calendar";
+import type { ICalendarRepository, IAppointmentReader } from "./types";
 
 // ─── Constants ─────────────────────────────────────────────────
 
@@ -24,6 +25,10 @@ const DEFAULT_DURATION_MINUTES = 60;
  * Failures do NOT throw and do NOT block the caller.
  */
 export class CalendarService {
+  constructor(
+    private readonly calendarRepo: ICalendarRepository = calendarRepository,
+    private readonly appointmentRepo: IAppointmentReader = appointmentRepository
+  ) {}
   // ─── OAuth2 Client Factory ──────────────────────────────────
 
   /**
@@ -38,7 +43,7 @@ export class CalendarService {
     userId: string
   ): Promise<OAuth2Client | null> {
     try {
-      const connection = await calendarRepository.findByUserId(userId);
+      const connection = await this.calendarRepo.findByUserId(userId);
       if (!connection || connection.status !== "ACTIVE") return null;
 
       const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -70,7 +75,7 @@ export class CalendarService {
       oauth2Client.on("tokens", async (tokens) => {
         try {
           if (tokens.access_token || tokens.refresh_token) {
-            await calendarRepository.upsertTokens(userId, {
+            await this.calendarRepo.upsertTokens(userId, {
               accessToken:
                 tokens.access_token ?? connection.accessToken,
               refreshToken:
@@ -169,10 +174,7 @@ export class CalendarService {
   ): Promise<SyncResult> {
     try {
       // 1. Fetch appointment with patient name
-      const appointment = await prisma.appointment.findUnique({
-        where: { id: appointmentId },
-        include: { patient: { select: { id: true, name: true } } },
-      });
+      const appointment = await this.appointmentRepo.findById(appointmentId);
 
       if (!appointment) {
         return this.result(
@@ -184,7 +186,7 @@ export class CalendarService {
       }
 
       // 2. Check calendar connection
-      const connection = await calendarRepository.findByUserId(userId);
+      const connection = await this.calendarRepo.findByUserId(userId);
       if (!connection || connection.status !== "ACTIVE") {
         return this.result("none", appointmentId);
       }
@@ -230,7 +232,7 @@ export class CalendarService {
               `[CalendarService] Google event ${appointment.googleEventId} gone (410). Re-creating.`
             );
 
-            await appointmentRepository.update(appointmentId, {
+            await this.appointmentRepo.update(appointmentId, {
               googleEventId: null,
             });
 
@@ -240,7 +242,7 @@ export class CalendarService {
             });
 
             if (createResponse.data.id) {
-              await appointmentRepository.update(appointmentId, {
+              await this.appointmentRepo.update(appointmentId, {
                 googleEventId: createResponse.data.id,
                 googleCalendarId: calendarId,
               });
@@ -263,7 +265,7 @@ export class CalendarService {
         });
 
         if (response.data.id) {
-          await appointmentRepository.update(appointmentId, {
+          await this.appointmentRepo.update(appointmentId, {
             googleEventId: response.data.id,
             googleCalendarId: calendarId,
           });
@@ -362,9 +364,7 @@ export class CalendarService {
   ): Promise<SyncResult> {
     try {
       // 1. Find local appointment by googleEventId
-      const appointment = await prisma.appointment.findUnique({
-        where: { googleEventId: googleEvent.id },
-      });
+      const appointment = await this.appointmentRepo.findByGoogleEventId(googleEvent.id);
 
       if (!appointment) {
         return this.result(
@@ -395,7 +395,7 @@ export class CalendarService {
         const minutes = String(startDate.getMinutes()).padStart(2, "0");
         const time = `${hours}:${minutes}`;
 
-        await appointmentRepository.update(appointment.id, {
+        await this.appointmentRepo.update(appointment.id, {
           date: startDate,
           time,
           notes: googleEvent.description ?? null,
@@ -447,7 +447,7 @@ export class CalendarService {
    */
   async catchUpSync(userId: string): Promise<SyncResult> {
     try {
-      const connection = await calendarRepository.findByUserId(userId);
+      const connection = await this.calendarRepo.findByUserId(userId);
       if (!connection || connection.status !== "ACTIVE") {
         return this.result(
           "none",
@@ -498,7 +498,7 @@ export class CalendarService {
       }
 
       // 3. Push local appointments without googleEventId
-      const appointments = await appointmentRepository.findByDentist(
+      const appointments = await this.appointmentRepo.findByDentist(
         userId
       );
 
@@ -509,7 +509,7 @@ export class CalendarService {
       }
 
       // 4. Update lastSyncedAt
-      await calendarRepository.updateLastSyncedAt(userId);
+      await this.calendarRepo.updateLastSyncedAt(userId);
 
       return this.result("update");
     } catch (error: unknown) {
@@ -541,5 +541,10 @@ export class CalendarService {
   }
 }
 
+/** Creates a CalendarService wired to real repositories. */
+export function createCalendarService(): CalendarService {
+  return new CalendarService(calendarRepository, appointmentRepository);
+}
+
 /** Singleton instance of the calendar sync service. */
-export const calendarService = new CalendarService();
+export const calendarService = createCalendarService();

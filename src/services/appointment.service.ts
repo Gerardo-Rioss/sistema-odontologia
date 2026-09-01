@@ -1,9 +1,14 @@
 import type { Appointment } from "@prisma/client";
 import { appointmentRepository } from "@/repositories/appointment.repository";
+import { calendarService } from "@/services/calendar.service";
 import type {
   CreateAppointmentDTO,
   UpdateAppointmentDTO,
 } from "@/lib/validations";
+import { verifyOwnership } from "@/lib/ownership";
+import { dateKeyOf } from "@/lib/formatters";
+import { ConflictError } from "@/lib/errors";
+import type { IAppointmentRepository, ICalendarSync } from "./types";
 
 /**
  * Servicio de gestión de citas odontológicas.
@@ -11,8 +16,15 @@ import type {
  * Orquesta la lógica de negocio entre los route handlers y el repositorio.
  * Aplica verificación de propiedad (multi-tenant) y detección de conflictos
  * de horario antes de crear o modificar citas.
+ *
+ * Dispara sync con Google Calendar de forma fire-and-forget después de cada
+ * operación que modifica una cita.
  */
 export class AppointmentService {
+  constructor(
+    private readonly appointmentRepo: IAppointmentRepository,
+    private readonly calendarSync: ICalendarSync = calendarService
+  ) {}
   // ─── Programar cita ─────────────────────────────────────────
 
   /**
@@ -28,7 +40,7 @@ export class AppointmentService {
   ): Promise<Appointment> {
     await this.checkTimeConflict(userId, data.date, data.time);
 
-    return appointmentRepository.create({
+    const appointment = await this.appointmentRepo.create({
       patientId: data.patientId,
       date: new Date(data.date),
       time: data.time,
@@ -36,6 +48,18 @@ export class AppointmentService {
       notes: data.notes ?? null,
       userId,
     });
+
+    // Fire-and-forget: sync to Google Calendar
+    this.calendarSync
+      .syncToCalendar(appointment.id, userId)
+      .catch((err) =>
+        console.error(
+          `[AppointmentService] Calendar sync failed for ${appointment.id}:`,
+          err
+        )
+      );
+
+    return appointment;
   }
 
   // ─── Reprogramar cita ──────────────────────────────────────
@@ -57,7 +81,7 @@ export class AppointmentService {
   ): Promise<Appointment> {
     const appointment = await this.verifyOwnership(id, userId);
 
-    const newDate = data.date ?? this.formatDate(appointment.date);
+    const newDate = data.date ?? dateKeyOf(appointment.date);
     const newTime = data.time ?? appointment.time;
 
     // Verificar conflicto si cambió fecha u hora
@@ -71,7 +95,19 @@ export class AppointmentService {
     if (data.type !== undefined) updateData.type = data.type;
     if (data.notes !== undefined) updateData.notes = data.notes;
 
-    return appointmentRepository.update(id, updateData);
+    const updated = await this.appointmentRepo.update(id, updateData);
+
+    // Fire-and-forget: sync to Google Calendar
+    this.calendarSync
+      .syncToCalendar(updated.id, userId)
+      .catch((err) =>
+        console.error(
+          `[AppointmentService] Calendar sync failed for ${updated.id}:`,
+          err
+        )
+      );
+
+    return updated;
   }
 
   // ─── Cancelar cita ─────────────────────────────────────────
@@ -89,12 +125,24 @@ export class AppointmentService {
     const appointment = await this.verifyOwnership(id, userId);
 
     if (appointment.status === "CANCELLED") {
-      throw new Error("La cita ya está cancelada");
+      throw new ConflictError("La cita ya está cancelada");
     }
 
-    return appointmentRepository.update(id, {
+    const updated = await this.appointmentRepo.update(id, {
       status: "CANCELLED",
     });
+
+    // Fire-and-forget: sync to Google Calendar
+    this.calendarSync
+      .syncToCalendar(updated.id, userId)
+      .catch((err) =>
+        console.error(
+          `[AppointmentService] Calendar sync failed for ${updated.id}:`,
+          err
+        )
+      );
+
+    return updated;
   }
 
   // ─── Confirmar cita ────────────────────────────────────────
@@ -110,12 +158,24 @@ export class AppointmentService {
     const appointment = await this.verifyOwnership(id, userId);
 
     if (appointment.status !== "PENDING") {
-      throw new Error("Solo se pueden confirmar citas pendientes");
+      throw new ConflictError("Solo se pueden confirmar citas pendientes");
     }
 
-    return appointmentRepository.update(id, {
+    const updated = await this.appointmentRepo.update(id, {
       status: "CONFIRMED",
     });
+
+    // Fire-and-forget: sync to Google Calendar
+    this.calendarSync
+      .syncToCalendar(updated.id, userId)
+      .catch((err) =>
+        console.error(
+          `[AppointmentService] Calendar sync failed for ${updated.id}:`,
+          err
+        )
+      );
+
+    return updated;
   }
 
   // ─── Listar citas ──────────────────────────────────────────
@@ -126,24 +186,15 @@ export class AppointmentService {
    * Filtros opcionales:
    * - `status`: filtra por estado (PENDING, CONFIRMED, etc.)
    * - `date`: filtra por fecha específica (YYYY-MM-DD)
+   * - `search`: busca por nombre de paciente (case-insensitive)
+   *
+   * Los filtros se aplican en la base de datos para mejor rendimiento.
    */
   async getAll(
     userId: string,
-    filters?: { status?: string; date?: string }
+    filters?: { status?: string; date?: string; search?: string }
   ): Promise<Appointment[]> {
-    let appointments = await appointmentRepository.findByDentist(userId);
-
-    if (filters?.status) {
-      appointments = appointments.filter((a) => a.status === filters.status);
-    }
-
-    if (filters?.date) {
-      appointments = appointments.filter(
-        (a) => this.formatDate(a.date) === filters.date
-      );
-    }
-
-    return appointments;
+    return this.appointmentRepo.findByDentistWithFilters(userId, filters);
   }
 
   // ─── Obtener cita por ID ───────────────────────────────────
@@ -167,8 +218,25 @@ export class AppointmentService {
    * @throws {Error} "No tiene permiso para eliminar esta cita" si no pertenece al usuario
    */
   async delete(id: string, userId: string): Promise<void> {
-    await this.verifyOwnership(id, userId);
-    await appointmentRepository.delete(id);
+    const appointment = await this.verifyOwnership(id, userId);
+
+    // Fire-and-forget: delete from Google Calendar before local deletion
+    if (appointment.googleEventId && appointment.googleCalendarId) {
+      this.calendarSync
+        .deleteFromCalendar(
+          appointment.googleEventId,
+          appointment.googleCalendarId,
+          userId
+        )
+        .catch((err) =>
+          console.error(
+            `[AppointmentService] Calendar delete failed for ${appointment.id}:`,
+            err
+          )
+        );
+    }
+
+    await this.appointmentRepo.delete(id);
   }
 
   // ─── Helpers privados ──────────────────────────────────────
@@ -186,17 +254,13 @@ export class AppointmentService {
     id: string,
     userId: string
   ): Promise<Appointment> {
-    const appointment = await appointmentRepository.findById(id);
-
-    if (!appointment) {
-      throw new Error("Cita no encontrada");
-    }
-
-    if (appointment.userId !== userId) {
-      throw new Error("No tiene permiso para acceder a esta cita");
-    }
-
-    return appointment;
+    return verifyOwnership(
+      this.appointmentRepo.findById.bind(this.appointmentRepo),
+      id,
+      userId,
+      "Cita no encontrada",
+      "No tiene permiso para acceder a esta cita"
+    );
   }
 
   /**
@@ -211,29 +275,26 @@ export class AppointmentService {
     time: string,
     excludeId?: string
   ): Promise<void> {
-    const appointments = await appointmentRepository.findByDentist(userId);
-
-    const conflict = appointments.find(
-      (a) =>
-        this.formatDate(a.date) === date &&
-        a.time === time &&
-        a.id !== excludeId
+    const conflict = await this.appointmentRepo.findByDentistAndTime(
+      userId,
+      date,
+      time,
+      excludeId
     );
 
     if (conflict) {
-      throw new Error(
+      throw new ConflictError(
         "Conflicto de horario: ya existe una cita en esta fecha y hora"
       );
     }
   }
 
-  /**
-   * Convierte una fecha a string ISO (YYYY-MM-DD).
-   */
-  private formatDate(date: Date): string {
-    return date.toISOString().slice(0, 10);
-  }
+}
+
+/** Creates an AppointmentService wired to the real repository and calendar. */
+export function createAppointmentService(): AppointmentService {
+  return new AppointmentService(appointmentRepository, calendarService);
 }
 
 /** Instancia singleton del servicio de citas. */
-export const appointmentService = new AppointmentService();
+export const appointmentService = createAppointmentService();

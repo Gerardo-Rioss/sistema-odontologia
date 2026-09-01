@@ -9,8 +9,12 @@
  *
  * All responses are in warm, friendly Spanish.
  */
-import { whatsappService } from "./whatsapp.service";
+import { conversationStateService } from "./conversation-state.service";
+import { whatsappMessaging } from "./whatsapp-messaging.service";
+import { slotService } from "./slot.service";
 import { appointmentService } from "./appointment.service";
+import { patientService } from "./patient.service";
+import { BUSINESS_HOURS } from "@/lib/constants";
 import type { ConversationState, ConversationContext } from "@/types";
 import type { Appointment } from "@prisma/client";
 
@@ -24,15 +28,26 @@ export type Intent =
   | "help"
   | "unknown";
 
-// ─── Constants ────────────────────────────────────────────────
-
-const BUSINESS_HOURS_START = 8;
-const BUSINESS_HOURS_END = 18;
-const LUNCH_HOUR = 13;
-
 // ─── Service ──────────────────────────────────────────────────
 
 export class ConversationService {
+  private static readonly SERVICE_LABELS: Record<string, string> = {
+    LIMPIEZA: "Limpieza dental",
+    REVISION: "Revisión general",
+    URGENCIA: "Urgencia",
+    TRATAMIENTO: "Otro tratamiento",
+    OTRO: "Otro tratamiento",
+  };
+
+  /** Returns the configured DENTIST_USER_ID or throws if not set. */
+  private getDentistUserId(): string {
+    const id = process.env.DENTIST_USER_ID;
+    if (!id) {
+      throw new Error("DENTIST_USER_ID is not configured");
+    }
+    return id;
+  }
+
   // ─── Intent Detection ──────────────────────────────────────
 
   /**
@@ -91,7 +106,7 @@ export class ConversationService {
     messageText: string
   ): Promise<void> {
     try {
-      const state = await whatsappService.getConversationState(phoneNumber);
+      const state = await conversationStateService.getConversationState(phoneNumber);
 
       // TTL check is handled inside getConversationState (returns null if expired)
 
@@ -105,7 +120,7 @@ export class ConversationService {
       );
       // Try to send a friendly error message (fire-and-forget)
       try {
-        await whatsappService.sendMessage(
+        await whatsappMessaging.sendMessage(
           phoneNumber,
           "😔 Lo siento, ocurrió un error inesperado. Por favor, intentá de nuevo en unos minutos o comunicate con la clínica por teléfono."
         );
@@ -136,8 +151,8 @@ export class ConversationService {
     // ── Mid-flow abort: "cancelar" / "no" during conversation ──
     if (state && state.currentState !== "IDLE" && state.currentState !== "COMPLETED") {
       if (intent === "cancel_appointment" || /\b(?:cancelar|no)\b/i.test(trimmed)) {
-        await whatsappService.clearConversationState(phoneNumber);
-        await whatsappService.sendMessage(
+        await conversationStateService.clearConversationState(phoneNumber);
+        await whatsappMessaging.sendMessage(
           phoneNumber,
           "✅ Operación cancelada. ¿En qué más puedo ayudarte? Escribí *hola* para ver las opciones."
         );
@@ -198,13 +213,13 @@ export class ConversationService {
    * Sets state → SERVICE_SELECTION.
    */
   async handleGreeting(phoneNumber: string): Promise<void> {
-    await whatsappService.sendMessage(
+    await whatsappMessaging.sendMessage(
       phoneNumber,
       "👋 ¡Hola! Bienvenido/a a la *Clínica Dental*.\n\n" +
         "Estoy acá para ayudarte a agendar, consultar o cancelar tus citas. 😊"
     );
 
-    await whatsappService.sendInteractiveList(
+    await whatsappMessaging.sendInteractiveList(
       phoneNumber,
       "Seleccioná el tipo de consulta",
       "¿Qué tipo de atención necesitás?",
@@ -238,7 +253,7 @@ export class ConversationService {
       ]
     );
 
-    await whatsappService.saveConversationState(
+    await conversationStateService.saveConversationState(
       phoneNumber,
       "SERVICE_SELECTION"
     );
@@ -255,7 +270,7 @@ export class ConversationService {
     const serviceType = this.parseServiceType(text);
 
     if (!serviceType) {
-      await whatsappService.sendMessage(
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "🤔 No reconocí esa opción. Por favor, seleccioná una de las opciones del menú:\n\n" +
           "• *Limpieza dental*\n" +
@@ -266,23 +281,15 @@ export class ConversationService {
       return;
     }
 
-    const serviceLabels: Record<string, string> = {
-      LIMPIEZA: "Limpieza dental",
-      REVISION: "Revisión general",
-      URGENCIA: "Urgencia",
-      TRATAMIENTO: "Otro tratamiento",
-      OTRO: "Otro tratamiento",
-    };
+    const label = ConversationService.SERVICE_LABELS[serviceType] || serviceType;
 
-    const label = serviceLabels[serviceType] || serviceType;
-
-    await whatsappService.saveConversationState(
+    await conversationStateService.saveConversationState(
       phoneNumber,
       "DATE_SELECTION",
       { selectedService: serviceType }
     );
 
-    await whatsappService.sendMessage(
+    await whatsappMessaging.sendMessage(
       phoneNumber,
       `✅ Seleccionaste: *${label}*\n\n` +
         "¿Para qué día querés agendar la cita?\n\n" +
@@ -305,7 +312,7 @@ export class ConversationService {
     const date = this.parseDate(text);
 
     if (!date) {
-      await whatsappService.sendMessage(
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "❌ No pude entender la fecha. ¿Podés escribirla de nuevo?\n\n" +
           "Ejemplos: *hoy*, *mañana*, *lunes*, *15/06* o *15/06/2026*"
@@ -316,23 +323,20 @@ export class ConversationService {
     // Validate date is not in the past
     const today = this.formatDate(new Date());
     if (date < today) {
-      await whatsappService.sendMessage(
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "⏪ Esa fecha ya pasó. Por favor, elegí una fecha de hoy en adelante."
       );
       return;
     }
 
-    const dentistUserId = process.env.DENTIST_USER_ID;
-    if (!dentistUserId) {
-      throw new Error("DENTIST_USER_ID is not configured");
-    }
+    const dentistUserId = this.getDentistUserId();
 
-    const slots = await whatsappService.getAvailableSlots(date, dentistUserId);
+    const slots = await slotService.getAvailableSlots(date, dentistUserId);
     const availableSlots = slots.filter((s) => s.available);
 
     if (availableSlots.length === 0) {
-      await whatsappService.sendMessage(
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "😔 No hay horarios disponibles para esa fecha. ¿Querés probar con otra fecha?\n\n" +
           "Escribí el día que te quede mejor."
@@ -340,7 +344,7 @@ export class ConversationService {
       return;
     }
 
-    await whatsappService.saveConversationState(
+    await conversationStateService.saveConversationState(
       phoneNumber,
       "TIME_SELECTION",
       {
@@ -353,7 +357,7 @@ export class ConversationService {
       .map((s) => `• *${s.time}*`)
       .join("\n");
 
-    await whatsappService.sendMessage(
+    await whatsappMessaging.sendMessage(
       phoneNumber,
       `📅 Fecha seleccionada: *${this.formatDateForDisplay(date)}*\n\n` +
         "Horarios disponibles:\n" +
@@ -375,7 +379,7 @@ export class ConversationService {
     const time = this.parseTime(text);
 
     if (!time) {
-      await whatsappService.sendMessage(
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "❌ No pude entender el horario. Escribilo en formato *HH:mm* (por ejemplo: *10:00* o *14:30*).\n\n" +
           "Recordá que atendemos de 8:00 a 18:00 (excepto 13:00 a 14:00)."
@@ -385,25 +389,22 @@ export class ConversationService {
 
     const date = context.selectedDate;
     if (!date) {
-      await whatsappService.sendMessage(
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "😅 Parece que hubo un problema con la fecha. Volvamos a empezar.\nEscribí *hola* para comenzar de nuevo."
       );
-      await whatsappService.clearConversationState(phoneNumber);
+      await conversationStateService.clearConversationState(phoneNumber);
       return;
     }
 
-    const dentistUserId = process.env.DENTIST_USER_ID;
-    if (!dentistUserId) {
-      throw new Error("DENTIST_USER_ID is not configured");
-    }
+    const dentistUserId = this.getDentistUserId();
 
     // Double-check slot availability
-    const slots = await whatsappService.getAvailableSlots(date, dentistUserId);
+    const slots = await slotService.getAvailableSlots(date, dentistUserId);
     const slot = slots.find((s) => s.time === time);
 
     if (!slot || !slot.available) {
-      await whatsappService.sendMessage(
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "⏰ Ese horario ya no está disponible. ¿Podés elegir otro?\n\n" +
           "Estos son los horarios libres:\n" +
@@ -416,16 +417,9 @@ export class ConversationService {
     }
 
     const serviceType = context.selectedService || "consulta";
-    const serviceLabels: Record<string, string> = {
-      LIMPIEZA: "Limpieza dental",
-      REVISION: "Revisión general",
-      URGENCIA: "Urgencia",
-      TRATAMIENTO: "Otro tratamiento",
-      OTRO: "Otro tratamiento",
-    };
-    const serviceLabel = serviceLabels[serviceType] || serviceType;
+    const serviceLabel = ConversationService.SERVICE_LABELS[serviceType] || serviceType;
 
-    await whatsappService.saveConversationState(
+    await conversationStateService.saveConversationState(
       phoneNumber,
       "CONFIRMATION",
       {
@@ -436,7 +430,7 @@ export class ConversationService {
 
     const dateDisplay = this.formatDateForDisplay(date);
 
-    await whatsappService.sendMessage(
+    await whatsappMessaging.sendMessage(
       phoneNumber,
       `📋 *Resumen de tu cita:*\n\n` +
         `• Tipo: *${serviceLabel}*\n` +
@@ -461,8 +455,8 @@ export class ConversationService {
 
     // Rejection
     if (/^(no|cancelar|nop|nah)$/i.test(trimmed)) {
-      await whatsappService.clearConversationState(phoneNumber);
-      await whatsappService.sendMessage(
+      await conversationStateService.clearConversationState(phoneNumber);
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "👌 Cita cancelada. Si necesitás agendar para otro momento, escribí *hola* cuando quieras."
       );
@@ -471,7 +465,7 @@ export class ConversationService {
 
     // Confirmation: sí, confirmar, ok, dale, etc.
     if (!/^(s[ií]|confirmar|ok|dale|bueno|aceptar|confirmo)\b/i.test(trimmed)) {
-      await whatsappService.sendMessage(
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "🤔 No entendí tu respuesta. ¿Confirmás la cita?\nRespondé *sí* para confirmar o *no* para cancelar."
       );
@@ -483,31 +477,28 @@ export class ConversationService {
     const serviceType = context.selectedService;
 
     if (!date || !time || !serviceType) {
-      await whatsappService.sendMessage(
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "😅 Faltan datos de la cita. Volvamos a empezar.\nEscribí *hola* para comenzar de nuevo."
       );
-      await whatsappService.clearConversationState(phoneNumber);
+      await conversationStateService.clearConversationState(phoneNumber);
       return;
     }
 
-    const dentistUserId = process.env.DENTIST_USER_ID;
-    if (!dentistUserId) {
-      throw new Error("DENTIST_USER_ID is not configured");
-    }
+    const dentistUserId = this.getDentistUserId();
 
     // ═══ Slot collision re-check ═══
-    const slots = await whatsappService.getAvailableSlots(date, dentistUserId);
+    const slots = await slotService.getAvailableSlots(date, dentistUserId);
     const slot = slots.find((s) => s.time === time);
 
     if (!slot || !slot.available) {
-      await whatsappService.sendMessage(
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "😔 Ese horario ya no está disponible. Alguien lo reservó mientras elegías.\n\n" +
           "Vamos a buscar otra fecha. ¿Qué día te queda mejor?\n" +
           "Ej: *mañana*, *lunes*, *20/06*"
       );
-      await whatsappService.saveConversationState(
+      await conversationStateService.saveConversationState(
         phoneNumber,
         "DATE_SELECTION",
         {
@@ -521,7 +512,7 @@ export class ConversationService {
     }
 
     // Get or create patient
-    const patient = await whatsappService.getPatientByPhone(phoneNumber);
+    const patient = await patientService.getPatientByPhone(phoneNumber);
 
     // Create appointment
     let appointment: Appointment;
@@ -540,13 +531,13 @@ export class ConversationService {
         error instanceof Error &&
         error.message.includes("Conflicto de horario")
       ) {
-        await whatsappService.sendMessage(
+        await whatsappMessaging.sendMessage(
           phoneNumber,
           "😔 Ese horario ya no está disponible. Alguien lo reservó mientras confirmabas.\n\n" +
             "Vamos a buscar otra fecha. ¿Qué día te queda mejor?\n" +
             "Ej: *mañana*, *lunes*, *20/06*"
         );
-        await whatsappService.saveConversationState(
+        await conversationStateService.saveConversationState(
           phoneNumber,
           "DATE_SELECTION",
           {
@@ -563,7 +554,7 @@ export class ConversationService {
     const dateDisplay = this.formatDateForDisplay(date);
 
     // Send confirmation
-    await whatsappService.sendMessage(
+    await whatsappMessaging.sendMessage(
       phoneNumber,
       `✅ ¡Cita confirmada! 🎉\n\n` +
         `📋 *Detalles:*\n` +
@@ -575,7 +566,7 @@ export class ConversationService {
 
     // Try to send a template message as well
     try {
-      await whatsappService.sendTemplate(
+      await whatsappMessaging.sendTemplate(
         phoneNumber,
         "appointment_confirmation"
       );
@@ -583,7 +574,7 @@ export class ConversationService {
       // Template send is best-effort
     }
 
-    await whatsappService.saveConversationState(
+    await conversationStateService.saveConversationState(
       phoneNumber,
       "COMPLETED",
       {
@@ -597,17 +588,14 @@ export class ConversationService {
    * and sends an interactive list for selection.
    */
   async handleCancellation(phoneNumber: string): Promise<void> {
-    const dentistUserId = process.env.DENTIST_USER_ID;
-    if (!dentistUserId) {
-      throw new Error("DENTIST_USER_ID is not configured");
-    }
+    const dentistUserId = this.getDentistUserId();
 
     // Find patient
     let patient;
     try {
-      patient = await whatsappService.getPatientByPhone(phoneNumber);
+      patient = await patientService.getPatientByPhone(phoneNumber);
     } catch {
-      await whatsappService.sendMessage(
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "Todavía no tenés citas registradas con nosotros. Escribí *hola* si querés agendar una."
       );
@@ -624,7 +612,7 @@ export class ConversationService {
     );
 
     if (patientAppointments.length === 0) {
-      await whatsappService.sendMessage(
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "No tenés citas activas para cancelar. Escribí *hola* si querés agendar una nueva."
       );
@@ -648,7 +636,7 @@ export class ConversationService {
       },
     ];
 
-    await whatsappService.sendInteractiveList(
+    await whatsappMessaging.sendInteractiveList(
       phoneNumber,
       "Cancelar cita",
       "Seleccioná la cita que querés cancelar:",
@@ -657,7 +645,7 @@ export class ConversationService {
     );
 
     // Set flag so next message is treated as cancellation selection
-    await whatsappService.saveConversationState(
+    await conversationStateService.saveConversationState(
       phoneNumber,
       "IDLE",
       { awaitingCancellation: true }
@@ -672,15 +660,12 @@ export class ConversationService {
     phoneNumber: string,
     appointmentId: string
   ): Promise<void> {
-    const dentistUserId = process.env.DENTIST_USER_ID;
-    if (!dentistUserId) {
-      throw new Error("DENTIST_USER_ID is not configured");
-    }
+    const dentistUserId = this.getDentistUserId();
 
     try {
       await appointmentService.cancel(appointmentId, dentistUserId);
-      await whatsappService.clearConversationState(phoneNumber);
-      await whatsappService.sendMessage(
+      await conversationStateService.clearConversationState(phoneNumber);
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "✅ Tu cita ha sido cancelada. Si necesitás agendar una nueva, escribí *hola*."
       );
@@ -689,8 +674,8 @@ export class ConversationService {
         `[ConversationService] Error cancelling appointment ${appointmentId}:`,
         error
       );
-      await whatsappService.clearConversationState(phoneNumber);
-      await whatsappService.sendMessage(
+      await conversationStateService.clearConversationState(phoneNumber);
+      await whatsappMessaging.sendMessage(
         phoneNumber,
         "😔 No se pudo cancelar la cita. Por favor, comunicate con la clínica por teléfono."
       );
@@ -798,9 +783,9 @@ export class ConversationService {
       const hour = parseInt(match[1], 10);
       const minute = parseInt(match[2], 10);
       if (
-        hour >= BUSINESS_HOURS_START &&
-        hour < BUSINESS_HOURS_END &&
-        !(hour === LUNCH_HOUR && minute >= 0 && minute < 60) &&
+        hour >= BUSINESS_HOURS.start &&
+        hour < BUSINESS_HOURS.end &&
+        !(hour === BUSINESS_HOURS.lunchStart && minute >= 0 && minute < 60) &&
         minute >= 0 &&
         minute < 60
       ) {
@@ -815,9 +800,9 @@ export class ConversationService {
       const hour = parseInt(match[1], 10);
       const minute = parseInt(match[2], 10);
       if (
-        hour >= BUSINESS_HOURS_START &&
-        hour < BUSINESS_HOURS_END &&
-        !(hour === LUNCH_HOUR) &&
+        hour >= BUSINESS_HOURS.start &&
+        hour < BUSINESS_HOURS.end &&
+        !(hour === BUSINESS_HOURS.lunchStart) &&
         minute >= 0 &&
         minute < 60
       ) {
@@ -831,9 +816,9 @@ export class ConversationService {
     if (match) {
       const hour = parseInt(match[1], 10);
       if (
-        hour >= BUSINESS_HOURS_START &&
-        hour < BUSINESS_HOURS_END &&
-        hour !== LUNCH_HOUR
+        hour >= BUSINESS_HOURS.start &&
+        hour < BUSINESS_HOURS.end &&
+        hour !== BUSINESS_HOURS.lunchStart
       ) {
         return `${hour.toString().padStart(2, "0")}:00`;
       }

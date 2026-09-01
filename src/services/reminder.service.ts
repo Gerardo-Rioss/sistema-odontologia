@@ -9,7 +9,8 @@
  * or the fallback HTTP endpoint (GET /api/whatsapp/cron/reminders).
  */
 import { prisma } from "@/lib/prisma";
-import { whatsappService } from "./whatsapp.service";
+import { whatsappMessaging } from "./whatsapp-messaging.service";
+import { dateKeyOf } from "@/lib/formatters";
 
 // ─── Constants ────────────────────────────────────────────────
 
@@ -70,11 +71,11 @@ export class ReminderService {
    */
   async sendAppointmentReminders(): Promise<ReminderResult> {
     const now = new Date();
-    const todayStr = this.formatDate(now);
+    const todayStr = dateKeyOf(now);
 
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = this.formatDate(tomorrow);
+    const tomorrowStr = dateKeyOf(tomorrow);
 
     // ── Query: CONFIRMED appointments for today / tomorrow ──
     const appointments = await prisma.appointment.findMany({
@@ -126,7 +127,7 @@ export class ReminderService {
         Math.abs(diffMs - TWENTY_FOUR_HOURS_MS) <= WINDOW_24H_TOLERANCE_MS
       ) {
         try {
-          await whatsappService.sendTemplate(
+          await whatsappMessaging.sendTemplate(
             appointment.patient.phone,
             "recordatorio_24h"
           );
@@ -152,7 +153,7 @@ export class ReminderService {
         Math.abs(diffMs - TWO_HOURS_MS) <= WINDOW_2H_TOLERANCE_MS
       ) {
         try {
-          await whatsappService.sendTemplate(
+          await whatsappMessaging.sendTemplate(
             appointment.patient.phone,
             "recordatorio_2h"
           );
@@ -187,11 +188,6 @@ export class ReminderService {
   }
 
   // ─── Helpers ──────────────────────────────────────────────
-
-  /** Formats a Date as YYYY-MM-DD. */
-  private formatDate(date: Date): string {
-    return date.toISOString().slice(0, 10);
-  }
 
   /** Promise-based delay. */
   private delay(ms: number): Promise<void> {
