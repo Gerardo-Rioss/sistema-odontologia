@@ -1,0 +1,46 @@
+schema: spec-driven
+
+context: |
+  Project: soda-odontologia — Dental clinic management system
+  Stack: Next.js 14 (App Router), TypeScript 5.4+, React 18, Tailwind CSS 3, shadcn/ui
+  Backend: PostgreSQL + Prisma ORM 5.14, NextAuth.js v5 (JWT + Credentials)
+  State: Zustand + React Query (TanStack)
+  Integrations: WhatsApp Business API, Google Calendar API, Sentry monitoring
+  Architecture: Repository Pattern + Service Layer, Server Components, Design Tokens (HSL)
+  Testing: Jest 29 (unit + integration), Playwright 1.44 (E2E), Testing Library, jest-axe
+  Quality: ESLint (next + @typescript-eslint), TypeScript strict, Prettier
+  Domain: Appointments, Patients, Calendar sync, WhatsApp messaging, Reminders, Dashboard analytics
+
+strict_tdd: true
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Reference affected domain models from Prisma schema
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Reference existing Prisma models for entity specs
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+    - Follow Repository + Service Layer pattern
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+    - Include test file paths in task descriptions
+  apply:
+    guidelines:
+      - Follow existing code patterns (Repository → Service → API → UI)
+      - Use Zod schemas from src/lib/validations.ts for input validation
+      - Server Components by default; "use client" only when needed
+      - Use shadcn/ui components from src/components/ui/
+    tdd: true
+    test_command: "npm test"
+  verify:
+    test_command: "npm test"
+    build_command: "npm run build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
+    - Verify all delta specs merged into main specs

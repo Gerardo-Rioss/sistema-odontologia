@@ -15,6 +15,8 @@ R1: SHALL respond to GET with `hub.challenge` by returning the challenge value. 
 
 R2: SHALL accept POST with JSON body containing `entry[0].changes[0].value.messages[]`. MUST validate `X-Hub-Signature-256` header via HMAC-SHA256 with `WHATSAPP_APP_SECRET`. Invalid → 401. Non-message payloads (statuses) → 200 OK, ignored.
 
+The system imports messaging operations from `whatsapp-messaging.service` instead of the monolithic `whatsapp.service`. No behavioral changes.
+
 R3: Every inbound message SHALL be persisted as `WhatsAppMessage` with `waMessageId`, `from` phone, `body`, `direction=INBOUND`, `timestamp`.
 
 ### Scenarios
