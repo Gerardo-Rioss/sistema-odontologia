@@ -50,7 +50,7 @@ jest.mock("@/components/ui/alert", () => ({
 // lucide-react is mocked globally in tests/__mocks__/lucide-react.tsx
 
 jest.mock("@/hooks/useCountUp", () => ({
-  useCountUp: (value) => value,
+  useCountUp: (value: number | string) => value,
 }));
 
 // ─── StatsCard ────────────────────────────────────────────────

@@ -8,7 +8,6 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { handleServiceError } from "@/lib/api-middleware";
 import { NotFoundError, ForbiddenError, ConflictError, AppError } from "@/lib/errors";
 import { ZodError, ZodIssue } from "zod";
 
