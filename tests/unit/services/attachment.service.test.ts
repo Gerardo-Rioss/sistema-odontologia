@@ -134,6 +134,12 @@ describe("AttachmentService", () => {
   });
 
   describe("upload", () => {
+    /** Buffer PNG mínimo con magic bytes reales (89 50 4E 47). */
+    const pngBuffer = Buffer.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00,
+      0x00,
+    ]);
+
     it("should upload a file and create attachment record", async () => {
       const patient = makePatient();
       const attachment = makeAttachment();
@@ -144,7 +150,7 @@ describe("AttachmentService", () => {
         name: "xray.png",
         type: "image/png",
         size: 1024,
-        buffer: Buffer.from("fake-image-data"),
+        buffer: pngBuffer,
       };
 
       const result = await service.upload(
@@ -216,13 +222,97 @@ describe("AttachmentService", () => {
         name: "my file (1).png",
         type: "image/png",
         size: 100,
-        buffer: Buffer.from("data"),
+        buffer: pngBuffer,
       });
 
       const writeCall = (fileStorage.writeFile as jest.Mock).mock.calls[0];
       const writtenPath = writeCall[0] as string;
       // Path should contain sanitized name (no spaces or parentheses in the file part)
       expect(writtenPath).toMatch(/my_file__1_\.png$/);
+    });
+
+    // ─── Validación de archivos (S-08) ────────────────────────
+
+    it("should reject files with blocked/executable extensions", async () => {
+      const patient = makePatient();
+      (patientRepo.findById as jest.Mock).mockResolvedValue(patient);
+
+      await expect(
+        service.upload("patient-1", "user-1", {
+          name: "malware.html",
+          type: "text/html",
+          size: 100,
+          buffer: Buffer.from("<script>alert(1)</script>"),
+        })
+      ).rejects.toThrow("Tipo de archivo no permitido");
+
+      expect(fileStorage.mkdir).not.toHaveBeenCalled();
+      expect(attachmentRepo.create).not.toHaveBeenCalled();
+    });
+
+    it("should reject files with MIME type not in whitelist", async () => {
+      const patient = makePatient();
+      (patientRepo.findById as jest.Mock).mockResolvedValue(patient);
+
+      await expect(
+        service.upload("patient-1", "user-1", {
+          name: "notes.txt",
+          type: "text/plain",
+          size: 100,
+          buffer: Buffer.from("notas sueltas"),
+        })
+      ).rejects.toThrow("Tipo MIME no permitido");
+
+      expect(fileStorage.mkdir).not.toHaveBeenCalled();
+    });
+
+    it("should reject files whose extension does not match the MIME type", async () => {
+      const patient = makePatient();
+      (patientRepo.findById as jest.Mock).mockResolvedValue(patient);
+
+      await expect(
+        service.upload("patient-1", "user-1", {
+          name: "photo.jpg",
+          type: "image/png",
+          size: 100,
+          buffer: pngBuffer,
+        })
+      ).rejects.toThrow("no corresponde al tipo");
+
+      expect(fileStorage.mkdir).not.toHaveBeenCalled();
+    });
+
+    it("should reject files whose content does not match the declared type (magic bytes)", async () => {
+      const patient = makePatient();
+      (patientRepo.findById as jest.Mock).mockResolvedValue(patient);
+
+      await expect(
+        service.upload("patient-1", "user-1", {
+          name: "fake.png",
+          type: "image/png",
+          size: 100,
+          // Contenido HTML disfrazado de PNG
+          buffer: Buffer.from("<html><body>not an image</body></html>"),
+        })
+      ).rejects.toThrow("no coincide con su tipo declarado");
+
+      expect(fileStorage.mkdir).not.toHaveBeenCalled();
+    });
+
+    it("should reject files larger than 10 MB", async () => {
+      const patient = makePatient();
+      (patientRepo.findById as jest.Mock).mockResolvedValue(patient);
+
+      await expect(
+        service.upload("patient-1", "user-1", {
+          name: "huge.png",
+          type: "image/png",
+          size: 11 * 1024 * 1024,
+          buffer: pngBuffer,
+        })
+      ).rejects.toThrow("supera el tamaño máximo");
+
+      expect(fileStorage.mkdir).not.toHaveBeenCalled();
     });
   });
 
