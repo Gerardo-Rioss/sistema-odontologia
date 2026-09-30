@@ -126,6 +126,28 @@ export const resetPasswordSchema = z.object({
 
 export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
 
+// ─── Configuración del consultorio ───────────────────────────
+/** Regex HH:mm (ej: "08:00", "20:30"). */
+const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+export const UpdateClinicSettingsDTO = z.object({
+  clinicName: z.string().trim().max(120).optional(),
+  address: z.string().trim().max(200).optional(),
+  city: z.string().trim().max(100).optional(),
+  phone: z.string().trim().max(30).optional(),
+  openTime: z.string().regex(TIME_PATTERN, "Formato de hora inválido (HH:mm)").or(z.literal("")).optional(),
+  closeTime: z.string().regex(TIME_PATTERN, "Formato de hora inválido (HH:mm)").or(z.literal("")).optional(),
+  workDays: z
+    .string()
+    .regex(/^[1-7](,[1-7])*$/, "Días inválidos (1-7 separados por coma)")
+    .or(z.literal(""))
+    .optional(),
+  whatsappReminders: z.boolean().optional(),
+  emailReminders: z.boolean().optional(),
+  reminderHours: z.number().int().min(1).max(168).optional(),
+}).strict();
+export type UpdateClinicSettingsDTO = z.infer<typeof UpdateClinicSettingsDTO>;
+
 // ─── Historia Clínica ─────────────────────────────────────────
 export const UpdateMedicalRecordDTO = z.object({
   allergies: z.string().optional().nullable(),

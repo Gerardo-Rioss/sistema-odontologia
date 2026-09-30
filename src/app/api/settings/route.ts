@@ -1,44 +1,7 @@
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api-middleware";
 import { clinicSettingsRepository } from "@/repositories/clinic-settings.repository";
-
-/** Campos editables de la configuración del consultorio. */
-const EDITABLE_FIELDS = [
-  "clinicName",
-  "address",
-  "city",
-  "phone",
-  "openTime",
-  "closeTime",
-  "workDays",
-  "whatsappReminders",
-  "emailReminders",
-  "reminderHours",
-] as const;
-
-function sanitize(body: Record<string, unknown>) {
-  const clean: Record<string, unknown> = {};
-  for (const field of EDITABLE_FIELDS) {
-    if (field in body) {
-      const value = body[field];
-      // Validaciones básicas por tipo
-      if (
-        field === "whatsappReminders" ||
-        field === "emailReminders"
-      ) {
-        clean[field] = Boolean(value);
-      } else if (field === "reminderHours") {
-        const hours = Number(value);
-        if (Number.isInteger(hours) && hours >= 1 && hours <= 168) {
-          clean[field] = hours;
-        }
-      } else if (typeof value === "string") {
-        clean[field] = value.trim();
-      }
-    }
-  }
-  return clean;
-}
+import { UpdateClinicSettingsDTO } from "@/lib/validations";
 
 /** GET /api/settings — devuelve la configuración del consultorio. */
 export const GET = withAuth(async (request, { session }) => {
@@ -68,7 +31,19 @@ export const PUT = withAuth(async (request, { session }) => {
     );
   }
 
-  const data = sanitize(body);
+  // Validación con Zod DTO (consistente con el resto del API)
+  const parsed = UpdateClinicSettingsDTO.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      {
+        error: "Datos inválidos",
+        details: parsed.error.flatten().fieldErrors,
+      },
+      { status: 400 }
+    );
+  }
+
+  const data = parsed.data;
   if (Object.keys(data).length === 0) {
     return NextResponse.json(
       { error: "No hay campos válidos para actualizar" },
