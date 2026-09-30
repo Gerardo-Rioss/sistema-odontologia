@@ -116,13 +116,31 @@ describe("Webhook — GET channel verification", () => {
 });
 
 describe("Webhook — POST push notifications", () => {
-  const VALID_TOKEN = process.env.NEXTAUTH_SECRET ?? "calendar-webhook-secret";
+  const VALID_TOKEN = "test-webhook-secret-123";
 
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.NEXTAUTH_SECRET = VALID_TOKEN;
+    delete process.env.CALENDAR_WEBHOOK_SECRET;
   });
 
   describe("authentication", () => {
+    it("should return 503 when no webhook secret is configured (fail closed)", async () => {
+      mockSession("user-1");
+      delete process.env.NEXTAUTH_SECRET;
+      delete process.env.CALENDAR_WEBHOOK_SECRET;
+
+      const { POST } = await import("@/app/api/calendar/webhook/route");
+      const response = await POST(
+        buildWebhookRequest({
+          "x-goog-channel-token": VALID_TOKEN,
+          "x-goog-resource-state": "sync",
+        })
+      );
+
+      expect(response.status).toBe(503);
+    });
+
     it("should return 403 when X-Goog-Channel-Token is missing", async () => {
       mockSession("user-1");
 
@@ -296,7 +314,11 @@ describe("Sync — POST /api/calendar/sync", () => {
     mockNoSession();
 
     const { POST } = await import("@/app/api/calendar/sync/route");
-    const response = await POST();
+    const response = await POST(
+      new NextRequest("http://localhost:3000/api/calendar/sync", {
+        method: "POST",
+      })
+    );
 
     expect(response.status).toBe(401);
   });
@@ -310,7 +332,11 @@ describe("Sync — POST /api/calendar/sync", () => {
     });
 
     const { POST } = await import("@/app/api/calendar/sync/route");
-    const response = await POST();
+    const response = await POST(
+      new NextRequest("http://localhost:3000/api/calendar/sync", {
+        method: "POST",
+      })
+    );
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -329,7 +355,9 @@ describe("Sync — GET /api/calendar/sync (health)", () => {
     mockCalendarRepo.findByUserId.mockResolvedValue(null);
 
     const { GET } = await import("@/app/api/calendar/sync/route");
-    const response = await GET();
+    const response = await GET(
+      new NextRequest("http://localhost:3000/api/calendar/sync")
+    );
     const body = await response.json();
 
     expect(body.connected).toBe(false);
@@ -347,7 +375,9 @@ describe("Sync — GET /api/calendar/sync (health)", () => {
     });
 
     const { GET } = await import("@/app/api/calendar/sync/route");
-    const response = await GET();
+    const response = await GET(
+      new NextRequest("http://localhost:3000/api/calendar/sync")
+    );
     const body = await response.json();
 
     expect(body.connected).toBe(true);

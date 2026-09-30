@@ -282,7 +282,9 @@ describe("OAuth Auth — GET /api/calendar/auth", () => {
     mockNoSession();
 
     const { GET } = await import("@/app/api/calendar/auth/route");
-    const response = await GET();
+    const response = await GET(
+      new NextRequest("http://localhost:3000/api/calendar/auth")
+    );
 
     expect(response.status).toBe(401);
   });
@@ -295,7 +297,9 @@ describe("OAuth Auth — GET /api/calendar/auth", () => {
     );
 
     const { GET } = await import("@/app/api/calendar/auth/route");
-    const response = await GET();
+    const response = await GET(
+      new NextRequest("http://localhost:3000/api/calendar/auth")
+    );
 
     expect(response.status).toBe(307);
     const location = response.headers.get("location");
@@ -317,7 +321,9 @@ describe("OAuth Auth — GET /api/calendar/auth", () => {
     delete process.env.GOOGLE_REDIRECT_URI;
 
     const { GET } = await import("@/app/api/calendar/auth/route");
-    const response = await GET();
+    const response = await GET(
+      new NextRequest("http://localhost:3000/api/calendar/auth")
+    );
 
     expect(response.status).toBe(500);
   });
@@ -381,7 +387,9 @@ describe("Status — GET /api/calendar/status", () => {
     mockCalendarRepo.findByUserId.mockResolvedValue(null);
 
     const { GET } = await import("@/app/api/calendar/status/route");
-    const response = await GET();
+    const response = await GET(
+      new NextRequest("http://localhost:3000/api/calendar/status")
+    );
     const body = await response.json();
 
     expect(body.connected).toBe(false);
@@ -398,7 +406,9 @@ describe("Status — GET /api/calendar/status", () => {
     });
 
     const { GET } = await import("@/app/api/calendar/status/route");
-    const response = await GET();
+    const response = await GET(
+      new NextRequest("http://localhost:3000/api/calendar/status")
+    );
     const body = await response.json();
 
     expect(body.connected).toBe(true);
@@ -417,7 +427,9 @@ describe("Status — GET /api/calendar/status", () => {
     });
 
     const { GET } = await import("@/app/api/calendar/status/route");
-    const response = await GET();
+    const response = await GET(
+      new NextRequest("http://localhost:3000/api/calendar/status")
+    );
     const body = await response.json();
 
     expect(body.connected).toBe(false);

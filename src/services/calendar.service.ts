@@ -1,7 +1,6 @@
 import { google } from "googleapis";
 import type { OAuth2Client } from "google-auth-library";
 import type { Appointment } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
 import { calendarRepository } from "@/repositories/calendar.repository";
 import { appointmentRepository } from "@/repositories/appointment.repository";
 import type { SyncResult, GoogleCalendarEvent } from "@/types/calendar";

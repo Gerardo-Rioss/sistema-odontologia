@@ -129,8 +129,8 @@ export interface ICalendarRepository {
       googleEmail: string | null;
       googleCalendarId: string;
     }
-  ): Promise<void>;
-  updateLastSyncedAt(userId: string): Promise<void>;
+  ): Promise<CalendarConnection>;
+  updateLastSyncedAt(userId: string): Promise<CalendarConnection | null>;
   delete(id: string): Promise<void>;
 }
 

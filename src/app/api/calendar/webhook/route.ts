@@ -19,9 +19,19 @@ import { calendarRepository } from "@/repositories/calendar.repository";
  * - Also handles webhook channel renewal/expiry.
  */
 
-/** Expected channel token — must match what was sent when creating the webhook channel. */
-function getExpectedChannelToken(): string {
-  return process.env.NEXTAUTH_SECRET ?? "calendar-webhook-secret";
+/**
+ * Expected channel token — must match what was sent when creating the webhook channel.
+ *
+ * Uses a dedicated `CALENDAR_WEBHOOK_SECRET` (fallback to NEXTAUTH_SECRET for
+ * backward compatibility). Returns null if none is configured so the webhook
+ * fails closed instead of accepting a predictable default.
+ */
+function getExpectedChannelToken(): string | null {
+  return (
+    process.env.CALENDAR_WEBHOOK_SECRET ||
+    process.env.NEXTAUTH_SECRET ||
+    null
+  );
 }
 
 export async function GET(request: NextRequest) {
@@ -54,6 +64,15 @@ export async function POST(request: NextRequest) {
 
     // ── Authenticate the webhook ─────────────────────────────
     const expectedToken = getExpectedChannelToken();
+    if (!expectedToken) {
+      console.error(
+        "[CalendarWebhook] CALENDAR_WEBHOOK_SECRET / NEXTAUTH_SECRET not configured — rejecting webhook"
+      );
+      return NextResponse.json(
+        { error: "Webhook not configured" },
+        { status: 503 }
+      );
+    }
     if (!channelToken || channelToken !== expectedToken) {
       console.warn(
         `[CalendarWebhook] Invalid channel token received: ${channelToken?.slice(0, 10)}...`
