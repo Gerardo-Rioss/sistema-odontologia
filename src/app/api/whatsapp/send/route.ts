@@ -12,14 +12,6 @@ import { whatsappMessaging } from "@/services/whatsapp-messaging.service";
  */
 export const POST = withAuth(
   async (request, { session }) => {
-    // Only admins can send manual messages
-    if (session.user.role !== "ADMIN") {
-      return NextResponse.json(
-        { error: "Solo administradores pueden enviar mensajes manuales" },
-        { status: 403 }
-      );
-    }
-
     let body: { phone?: string; text?: string };
     try {
       body = await request.json();
